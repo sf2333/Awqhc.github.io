@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GUET梦极光杯（校赛）PWN部分wp | 爱玩且很菜</title><meta name="keywords" content="-PWN -Linux"><meta name="author" content="pyh"><meta name="copyright" content="pyh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="PWNCheckinIda打开发现需要输入三个变量满足一个简单的等式，没什么限制随意构造即可  进入vul函数，发现存在栈溢出，偏移为10h，  还找到了后门函数，  坑（关键点）： 注意输入数字要用str（）包裹，以前做题不常遇到（还是题做少了），这次比赛被这个点坑了一个小时，哭了 EXP：  Arry题目有很多提示：数组越界、got表、可以向下越界也能向上越界（我太菜了，这么多提示还做了半天）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GUET梦极光杯（校赛）PWN部分wp">
+<meta property="og:url" content="http://example.com/2021/11/15/GUET%E6%A2%A6%E6%9E%81%E5%85%89%E6%9D%AF%EF%BC%88%E6%A0%A1%E8%B5%9B%EF%BC%89PWN%E9%83%A8%E5%88%86wp/index.html">
+<meta property="og:site_name" content="爱玩且很菜">
+<meta property="og:description" content="PWNCheckinIda打开发现需要输入三个变量满足一个简单的等式，没什么限制随意构造即可  进入vul函数，发现存在栈溢出，偏移为10h，  还找到了后门函数，  坑（关键点）： 注意输入数字要用str（）包裹，以前做题不常遇到（还是题做少了），这次比赛被这个点坑了一个小时，哭了 EXP：  Arry题目有很多提示：数组越界、got表、可以向下越界也能向上越界（我太菜了，这么多提示还做了半天）">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-z8o88j.jpg">
+<meta property="article:published_time" content="2021-11-15T05:45:32.000Z">
+<meta property="article:modified_time" content="2021-11-15T05:47:50.290Z">
+<meta property="article:author" content="pyh">
+<meta property="article:tag" content="-PWN -Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-z8o88j.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2021/11/15/GUET%E6%A2%A6%E6%9E%81%E5%85%89%E6%9D%AF%EF%BC%88%E6%A0%A1%E8%B5%9B%EF%BC%89PWN%E9%83%A8%E5%88%86wp/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?var _hmt = _hmt || []; (function() { var hm = document.createElement("script"); hm.src = "https://hm.baidu.com/hm.js?1edf852d28f0a2b88704ac1412f5bb44"; var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(hm, s);})();";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'GUET梦极光杯（校赛）PWN部分wp',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-11-15 13:47:50'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/1580288142723622.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清單</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音樂</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 電影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友鏈</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-z8o88j.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">爱玩且很菜</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清單</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音樂</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 電影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友鏈</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">GUET梦极光杯（校赛）PWN部分wp</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-11-15T05:45:32.000Z" title="发表于 2021-11-15 13:45:32">2021-11-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-11-15T05:47:50.290Z" title="更新于 2021-11-15 13:47:50">2021-11-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/PWN-Linux/">-PWN -Linux</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="GUET梦极光杯（校赛）PWN部分wp"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="PWN"><a href="#PWN" class="headerlink" title="PWN"></a>PWN</h1><h2 id="Checkin"><a href="#Checkin" class="headerlink" title="Checkin"></a>Checkin</h2><p>Ida打开发现需要输入三个变量满足一个简单的等式，没什么限制随意构造即可</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/clip_image002.png" alt="img"></p>
+<p>进入vul函数，发现存在栈溢出，偏移为10h，</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/clip_image003.png" alt="img"></p>
+<p>还找到了后门函数，</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/clip_image004.png" alt="img"></p>
+<p><strong>坑（关键点）：</strong> 注意输入<strong>数字要用str（）包裹</strong>，以前做题不常遇到（还是题做少了），这次比赛被这个点坑了一个小时，哭了</p>
+<p>EXP：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/clip_image006.png" alt="img"></p>
+<h2 id="Arry"><a href="#Arry" class="headerlink" title="Arry"></a>Arry</h2><p>题目有很多提示：数组越界、got表、可以向下越界也能向上越界（我太菜了，这么多提示还做了半天）</p>
+<p>打开ida，发现程序可以通过数组越界查看任意地址里的值并更改它，并且程序已经存在system（“/bin/sh”）</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/clip_image008.png" alt="img"></p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/clip_image009.png" alt="img"></p>
+<p>因为程序开了aslr保护（最后三位不变），所以我们要先泄露程序代码段的基址，然后再将printf的got表覆盖成后门函数的地址，</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/clip_image011.png" alt="img"></p>
+<p>在gdb中调试发现bss段中arry离got段很近，直接地址相减得到负数的偏移，然后获得stack_chk_fail函数的地址，然后用0xFFFFFFFFF000与得到的地址相与得到代码段基址，然后用基址加上偏移计算得到后门函数地址，再利用一次数组越界将printf的got表覆盖成后门函数地址</p>
+<p> <strong>坑（关键点）1：</strong> 这题因为有alsr不能直接bp+绝对地址下断点，导致我在脚本里不会调试盯着报错看了2个小时，后面发现是以前的知识点被我忘了——利用<strong>bp $rebase(偏移地址)下断点</strong>，只要程序没有反调试都能在本地调试！！！</p>
+<p><strong>坑（关键点）2：</strong> 第一次利用数组越界来获得代码段基址，我是选择泄露system函数的got表值，不知道为什么change时我填入的是获取到的它的原始值，但是调试的时候发现程序中的system got表值被更改了，这个坑加上前面我不会调试的坑让我一直不知道为什么打不出来，干瞪着电脑屏幕发呆。</p>
+<p>Exp：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/clip_image013.png" alt="img"></p>
+<h2 id="Shellcode"><a href="#Shellcode" class="headerlink" title="Shellcode"></a>Shellcode</h2></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">pyh</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2021/11/15/GUET%E6%A2%A6%E6%9E%81%E5%85%89%E6%9D%AF%EF%BC%88%E6%A0%A1%E8%B5%9B%EF%BC%89PWN%E9%83%A8%E5%88%86wp/">http://example.com/2021/11/15/GUET%E6%A2%A6%E6%9E%81%E5%85%89%E6%9D%AF%EF%BC%88%E6%A0%A1%E8%B5%9B%EF%BC%89PWN%E9%83%A8%E5%88%86wp/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">爱玩且很菜</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/PWN-Linux/">-PWN -Linux</a></div><div class="post_share"><div class="social-share" data-image="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-z8o88j.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/11/15/OWASP-Top10--2021/"><img class="next-cover" src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-3z2ge3.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">OWASP Top10 -2021</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/1580288142723622.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">pyh</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">15</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://sf2333.github.io/"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#PWN"><span class="toc-number">1.</span> <span class="toc-text">PWN</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Checkin"><span class="toc-number">1.1.</span> <span class="toc-text">Checkin</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Arry"><span class="toc-number">1.2.</span> <span class="toc-text">Arry</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Shellcode"><span class="toc-number">1.3.</span> <span class="toc-text">Shellcode</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/11/15/GUET%E6%A2%A6%E6%9E%81%E5%85%89%E6%9D%AF%EF%BC%88%E6%A0%A1%E8%B5%9B%EF%BC%89PWN%E9%83%A8%E5%88%86wp/" title="GUET梦极光杯（校赛）PWN部分wp"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-z8o88j.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GUET梦极光杯（校赛）PWN部分wp"/></a><div class="content"><a class="title" href="/2021/11/15/GUET%E6%A2%A6%E6%9E%81%E5%85%89%E6%9D%AF%EF%BC%88%E6%A0%A1%E8%B5%9B%EF%BC%89PWN%E9%83%A8%E5%88%86wp/" title="GUET梦极光杯（校赛）PWN部分wp">GUET梦极光杯（校赛）PWN部分wp</a><time datetime="2021-11-15T05:45:32.000Z" title="发表于 2021-11-15 13:45:32">2021-11-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/15/OWASP-Top10--2021/" title="OWASP Top10 -2021"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-3z2ge3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="OWASP Top10 -2021"/></a><div class="content"><a class="title" href="/2021/11/15/OWASP-Top10--2021/" title="OWASP Top10 -2021">OWASP Top10 -2021</a><time datetime="2021-11-15T05:01:03.000Z" title="发表于 2021-11-15 13:01:03">2021-11-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/05/Windows%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%A6%86%E7%9B%96SEH%E6%BC%8F%E6%B4%9E/" title="Windows漏洞学习之栈溢出覆盖SEH"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-5738y9.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Windows漏洞学习之栈溢出覆盖SEH"/></a><div class="content"><a class="title" href="/2021/11/05/Windows%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%A6%86%E7%9B%96SEH%E6%BC%8F%E6%B4%9E/" title="Windows漏洞学习之栈溢出覆盖SEH">Windows漏洞学习之栈溢出覆盖SEH</a><time datetime="2021-11-05T06:24:45.000Z" title="发表于 2021-11-05 14:24:45">2021-11-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/03/Metasploit%E7%9A%84%E7%AE%80%E5%8D%95%E5%BA%94%E7%94%A8/" title="Metasploit的简单应用"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-pkl2ge.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Metasploit的简单应用"/></a><div class="content"><a class="title" href="/2021/11/03/Metasploit%E7%9A%84%E7%AE%80%E5%8D%95%E5%BA%94%E7%94%A8/" title="Metasploit的简单应用">Metasploit的简单应用</a><time datetime="2021-11-03T11:33:05.000Z" title="发表于 2021-11-03 19:33:05">2021-11-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/03/Easy-File-Sharing-Web-Server-%E7%BC%93%E5%86%B2%E5%8C%BA%E6%BA%A2%E5%87%BA%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" title="Easy File Sharing Web Server 缓冲区溢出漏洞复现"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-l396w2.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Easy File Sharing Web Server 缓冲区溢出漏洞复现"/></a><div class="content"><a class="title" href="/2021/11/03/Easy-File-Sharing-Web-Server-%E7%BC%93%E5%86%B2%E5%8C%BA%E6%BA%A2%E5%87%BA%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" title="Easy File Sharing Web Server 缓冲区溢出漏洞复现">Easy File Sharing Web Server 缓冲区溢出漏洞复现</a><time datetime="2021-11-03T06:24:45.000Z" title="发表于 2021-11-03 14:24:45">2021-11-03</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By pyh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'gs3x0tWmEaUp6ROxQivXPxe5-gzGzoHsz',
+      appKey: '8L9o8UYajHnPE9l93nFXvr60',
+      placeholder: '请在此留下你的足迹!',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'en',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+      requiredFields: ["nick,mail"],
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'http://example.com/2021/11/15/GUET%E6%A2%A6%E6%9E%81%E5%85%89%E6%9D%AF%EF%BC%88%E6%A0%A1%E8%B5%9B%EF%BC%89PWN%E9%83%A8%E5%88%86wp/'
+    this.page.identifier = '2021/11/15/GUET梦极光杯（校赛）PWN部分wp/'
+    this.page.title = 'GUET梦极光杯（校赛）PWN部分wp'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://shortname-tddqilfyge.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+}
+
+if ('Valine' === 'Disqus' || !true) {
+  if (true) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
