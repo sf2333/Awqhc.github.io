@@ -1,0 +1,281 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>数据结构大作业-算法可视化设计 | 爱玩且很菜</title><meta name="keywords" content="数据结构,python"><meta name="author" content="pyh"><meta name="copyright" content="pyh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="中国邮递员可视化设计 中国邮递员问题背景中国邮递员问题是邮递员在某一地区的信件投递路程问题。邮递员每天从邮局出发，走遍该地区所有街道再返回邮局，问题是他应如何安排送信的路线可以使所走的总路程最短。这个问题由中国学者管梅谷在1960年首先提出，并给出了解法——“奇偶点图上作业法”，被国际上统称为“中国邮递员问题”。用图论的语言描述，给定一个连通图G，每边e有非负权)，要求一条回路经过每条边至少一次，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据结构大作业-算法可视化设计">
+<meta property="og:url" content="http://example.com/2021/12/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%A4%A7%E4%BD%9C%E4%B8%9A-UI%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="爱玩且很菜">
+<meta property="og:description" content="中国邮递员可视化设计 中国邮递员问题背景中国邮递员问题是邮递员在某一地区的信件投递路程问题。邮递员每天从邮局出发，走遍该地区所有街道再返回邮局，问题是他应如何安排送信的路线可以使所走的总路程最短。这个问题由中国学者管梅谷在1960年首先提出，并给出了解法——“奇偶点图上作业法”，被国际上统称为“中国邮递员问题”。用图论的语言描述，给定一个连通图G，每边e有非负权)，要求一条回路经过每条边至少一次，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-q2pgyr.webp">
+<meta property="article:published_time" content="2021-12-06T02:10:25.000Z">
+<meta property="article:modified_time" content="2021-12-06T07:55:58.425Z">
+<meta property="article:author" content="pyh">
+<meta property="article:tag" content="数据结构">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-q2pgyr.webp"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2021/12/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%A4%A7%E4%BD%9C%E4%B8%9A-UI%E8%AE%BE%E8%AE%A1/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?var _hmt = _hmt || []; (function() { var hm = document.createElement("script"); hm.src = "https://hm.baidu.com/hm.js?1edf852d28f0a2b88704ac1412f5bb44"; var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(hm, s);})();";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '数据结构大作业-算法可视化设计',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-12-06 15:55:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/1580288142723622.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清單</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音樂</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 電影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友鏈</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-q2pgyr.webp')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">爱玩且很菜</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清單</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音樂</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 電影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友鏈</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">数据结构大作业-算法可视化设计</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-12-06T02:10:25.000Z" title="发表于 2021-12-06 10:10:25">2021-12-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2021-12-06T07:55:58.425Z" title="更新于 2021-12-06 15:55:58">2021-12-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="数据结构大作业-算法可视化设计"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="中国邮递员可视化设计"><a href="#中国邮递员可视化设计" class="headerlink" title="中国邮递员可视化设计"></a>中国邮递员可视化设计</h1><p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/20200708203502702.gif" alt="20200708203502702"></p>
+<h2 id="中国邮递员问题背景"><a href="#中国邮递员问题背景" class="headerlink" title="中国邮递员问题背景"></a>中国邮递员问题背景</h2><p>中国邮递员问题是邮递员在某一地区的信件投递路程问题。邮递员每天从邮局出发，走遍该地区所有街道再返回邮局，问题是他应如何安排送信的路线可以使所走的总路程最短。这个问题由中国学者管梅谷在1960年首先提出，并给出了解法——“奇偶点图上作业法”，被国际上统称为“中国邮递员问题”。用图论的语言描述，给定一个连通图G，每边e有非负权)，要求一条回路经过每条边至少一次，且满足总权最小。</p>
+<h2 id="成品展示及功能介绍"><a href="#成品展示及功能介绍" class="headerlink" title="成品展示及功能介绍"></a>成品展示及功能介绍</h2><p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20211206112717813.png" alt="image-20211206112717813"></p>
+<p>左边一列有三个按钮，它们的功能依次是 <strong>初始化地图、下一步、上一步</strong>。</p>
+<p>右边的大画布就是 <strong>地图的显示界面</strong>，地图的生成是根据 用户在算法程序中输入的地图边信息构成的，地图中的每个结点的 <strong>相对位置是固定的</strong> ，但是 **绝对位置是随机的 **，用户可以多按几次初始化地图按钮，生成他们想要的地图样式。</p>
+<p>每当按下一步按钮，邮递员就会依照算法程序得到的最终路径来前进一步，上一步按钮顾名思义就是返回上一次邮递员的位置。</p>
+<p><strong>邮递员的前进是通过结点和边的颜色变化实现的</strong>，邮局（起点）为浅绿色、未走过的结点为浅蓝色、未走过的边为黑色，走过一次的结点和边都为金色，走过多次的结点和边都为紫色，经过邮局其颜色会变为红色，到达终点（回到邮局）其颜色又会变为浅绿色，边的权值为黑色方框中的白色字体。</p>
+<p>走了一半：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20211206113814285.png" alt="image-20211206113814285"></p>
+<p>到达终点：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20211206114211684.png" alt="image-20211206114211684"></p>
+<p>不同的地图：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20211206154759241.png" alt="image-20211206154759241"></p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20211206154347163.png" alt="image-20211206154347163"></p>
+<h2 id="设计环境"><a href="#设计环境" class="headerlink" title="设计环境"></a>设计环境</h2><p><strong>python 3.9</strong></p>
+<p>使用的库主要有：</p>
+<p>​    <strong>PyQt5、matplotlib、networkx、read_csv</strong></p>
+<h2 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h2><p>用 <strong>read_csv</strong>库 读取由 <strong>C#<strong>编写的算法程序生成的保存有 <strong>中国邮递员街区里的边的信息 <strong>和 <strong>最短路径所经过的结点信息</strong> 的 <strong>csv文件</strong>，用 <strong>network</strong>库 来构建无向图即 <strong>生成街区地图</strong>，邮递员每走过一条街道，这条 <strong>街道和其末端结点的颜色</strong> 就会被更改，以此来区分经过的结点和未经过的结点，并且每走一步会 <strong>判断这条街道和其末端结点是否被走过</strong> ，被走过多次的街道和结点会用其他的颜色来标记它，用 <strong>matolotlib</strong>库 将街区地图画在画布上，最后将 承载街区地图的画布安置在 <strong>PyQt5</strong> 设计的 <strong>UI界面</strong> 上，并且添加 <strong>按钮控制</strong> 街区地图的生成、</strong>上一步</strong>、</strong>下一步</strong>。</p>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><h3 id="读取csv文件"><a href="#读取csv文件" class="headerlink" title="读取csv文件"></a>读取csv文件</h3><p>代码实现还是很简单的，网上看一两个例子就能模仿出来，没啥好说的</p>
+<img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20211206104836230.png" alt="image-20211206104836230" style="zoom: 67%;" />
+
+<figure class="highlight livecodeserver"><table><tr><td class="code"><pre><span class="line">import csv</span><br><span class="line"><span class="comment"># 读取csv至列表</span></span><br><span class="line">def read_route():</span><br><span class="line">    csvFile = <span class="built_in">open</span>(<span class="string">&quot;graph.csv&quot;</span>, <span class="string">&quot;r&quot;</span>)</span><br><span class="line">    reader = csv.reader(csvFile)</span><br><span class="line">    <span class="comment"># 建立空列表</span></span><br><span class="line">    <span class="built_in">result</span> = []</span><br><span class="line">    <span class="keyword">for</span> <span class="keyword">item</span> <span class="keyword">in</span> reader:</span><br><span class="line">        <span class="comment">#print(item)</span></span><br><span class="line">        <span class="built_in">result</span>.append((<span class="keyword">item</span>[<span class="number">0</span>], <span class="keyword">item</span>[<span class="number">1</span>], <span class="keyword">item</span>[<span class="number">2</span>]))</span><br><span class="line">    csvFile.<span class="built_in">close</span>()</span><br><span class="line">    <span class="comment">#print(result)</span></span><br><span class="line">    <span class="literal">return</span> <span class="built_in">result</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="network构造无向图-（重点）"><a href="#network构造无向图-（重点）" class="headerlink" title="network构造无向图 （重点）"></a>network构造无向图 （重点）</h2><h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>定义一个初始的无向图，然后给它添加边（边的信息是读取上面的csv得到的），边的属性包括它的权值 - <strong>weight</strong>，起始结点和末端结点，颜色 - <strong>color</strong>（初始化时所有的边默认为黑色，表示未走过）</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> networkx <span class="keyword">as</span> nx</span><br><span class="line">G = nx.Graph()  <span class="comment"># 定义初始无向图</span></span><br><span class="line">G.add_weighted_edges_from(init_edgelist, color=<span class="string">&#x27;black&#x27;</span>)  <span class="comment"># 添加边</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="添加属性"><a href="#添加属性" class="headerlink" title="添加属性"></a>添加属性</h3><p>为了让之后结点颜色发生变化，我们要给结点添加一个 <strong>color</strong> 属性，并且我们之后还得利用 <strong>nx.layout.spring_layout</strong> 函数来生成结点的坐标，这个函数是通过 <strong>Fruchterman-Reingold 力导向算法</strong> 来计算结点位置的，简单的说就是，<strong>边的吸引力属性值越大，这条边两端的结点离得越近，即边越短</strong>，所以我们通过将边的 <strong>weight（权值）</strong> 取倒数的方法构建 <strong>边的吸引力属性</strong>，0.5是由测试得到的效果较好的值。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#添加结点的颜色属性</span></span><br><span class="line">      <span class="keyword">for</span> m <span class="keyword">in</span> self.nodelist:</span><br><span class="line">          self.G.nodes[m].update(&#123;<span class="string">&#x27;color&#x27;</span>: <span class="string">&#x27;lightskyblue&#x27;</span>&#125;)  <span class="comment"># 初始状态</span></span><br><span class="line">      <span class="comment">#添加边的吸引力属性，用于确定坐标</span></span><br><span class="line">      <span class="keyword">for</span> k <span class="keyword">in</span> self.edgelist:</span><br><span class="line">          self.G.edges[k].update(&#123;<span class="string">&#x27;attraction&#x27;</span>: <span class="built_in">str</span>(<span class="number">0.5</span>/<span class="built_in">int</span>(nx.get_edge_attributes(self.G, <span class="string">&#x27;weight&#x27;</span>)[k]))&#125;)</span><br><span class="line">      <span class="comment"># 起始点颜色属性</span></span><br><span class="line">      self.G.nodes[self.start].update(&#123;<span class="string">&#x27;color&#x27;</span>: <span class="string">&#x27;lightgreen&#x27;</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="获取结点的坐标"><a href="#获取结点的坐标" class="headerlink" title="获取结点的坐标"></a>获取结点的坐标</h3><p>这个布局函数是我们构建图的关键，我们需要了解它的参数</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">self.pos = nx.spring_layout(self.G, weight=<span class="string">&#x27;attraction&#x27;</span>, iterations=<span class="built_in">pow</span>(node_num, <span class="number">2</span>))</span><br></pre></td></tr></table></figure>
+
+<p>官方文档：</p>
+<img src="C:/Users/DH/AppData/Roaming/Typora/typora-user-images/image-20211206112529463.png" alt="image-20211206112529463" style="zoom:80%;" />
+
+<p>这里我只介绍几个关键参数：</p>
+<h4 id="weight"><a href="#weight" class="headerlink" title="weight :"></a><strong>weight</strong> :</h4><p>它的值必须是边的属性，布局函数会依照它的值调用 <strong>Fruchterman-Reingold 力导向算法</strong> 定位节点生成所有点的坐标，我们填入的属性可以被称为 <strong>边两端结点吸引力</strong>，即一个边的该属性值越大，它两端的结点离得越近，边越短。所以我之前在给边添加属性的时候，添加了一个 <strong>‘attraction’</strong> 属性，它就是用于此处，它的值是边权值属性的倒数，即边的权值越大，边两端结点的吸引力越小，边越长。</p>
+<h4 id="力引导布局（Force-directed-Layout）"><a href="#力引导布局（Force-directed-Layout）" class="headerlink" title="力引导布局（Force-directed Layout）"></a>力引导布局（Force-directed Layout）</h4><p>力引导布局最早由Peter Eades在1984年的“启发式画图算法”一文中提出，目的是减少布局中边的交叉，尽量保持边的长度一致。此方法借用弹簧模型模拟布局过程：用弹簧模拟两个点之间的关系，受到弹力的作用后，过近的点会被弹开而过远的点被拉近；通过不断的迭代，整个布局达到动态平衡，趋于稳定。其后，“力引导”的概念被提出，演化成 <strong>力引导布局算法FR（Fruchterman-Reingold算法）</strong>——丰富两点之间的物理模型，加入点之间的静电力，通过计算系统的总能量并使得能量最小化，从而达到布局的目的。这种改进的能量模型，可看成弹簧模型的一般化。</p>
+<p>无论是弹簧模型还是能量模型，其算法的本质是要接一个能量优化问题，区别在于优化函数的组成不同。优化对象包括引力和斥力部分，不同算法对引力和斥力的表达方式不同。</p>
+<h4 id="itrations"><a href="#itrations" class="headerlink" title="itrations:"></a>itrations:</h4><p>它的值是一个int类型数值，表示 Fruchterman-Reingold算法的 <strong>最大迭代次数</strong>，理论上这个值越大，图上点的分布越符合预期，但是过大的值又会影响运行效率。我给它设定的值是 图中结点个数的平方。</p>
+<h4 id="seed"><a href="#seed" class="headerlink" title="seed"></a>seed</h4><p>它的值是一个int类型数值，默认为None，Fruchterman-Reingold算法会根据它的值生成不同的结点布局，如果这个值被固定了，那么生成的图将是唯一的。为了带有随机性，我没有设置它，保持默认值。</p>
+<h3 id="将图画出来"><a href="#将图画出来" class="headerlink" title="将图画出来"></a>将图画出来</h3><p>这一步就是设定一些字体大小，结点大小，用 <strong>nx.draw</strong> 画出所有结点的初始状态，然后再用<strong>nx.draw_networkx_nodes</strong> 单独画起点结点，再用 <strong>nx.draw_networkx_labels</strong> 和 <strong>nx.draw_networkx_edge_labels</strong>  画出结点的标签——结点名称或边的权值，最后将图画在画布上。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 画出无向图</span></span><br><span class="line">nx.draw(self.G, self.pos, font_size=<span class="number">16</span>, with_labels=<span class="literal">False</span>, width=<span class="number">5</span>, node_color=<span class="string">&#x27;lightskyblue&#x27;</span>, edge_color=<span class="string">&#x27;black&#x27;</span>, node_size=<span class="number">1200</span>, edgecolors=<span class="string">&#x27;black&#x27;</span>, linewidths=<span class="number">2.0</span>)  <span class="comment"># 画所有结点和边</span></span><br><span class="line">nx.draw_networkx_nodes(self.G, self.pos, nodelist=self.start, node_color=nx.get_node_attributes(self.G, <span class="string">&#x27;color&#x27;</span>)[self.start], node_size=<span class="number">1200</span>, edgecolors=<span class="string">&#x27;black&#x27;</span>, linewidths=<span class="number">2.0</span>)  <span class="comment"># 画起点结点</span></span><br><span class="line">nx.draw_networkx_labels(self.G, self.pos, font_size=<span class="number">30</span>, font_family=<span class="string">&quot;sans-serif&quot;</span>) <span class="comment"># 画结点的标签-名字</span></span><br><span class="line">nx.draw_networkx_edge_labels(self.G, self.pos_attrs, edge_labels=self.edge_weight, font_size=<span class="number">26</span>, font_color=<span class="string">&#x27;white&#x27;</span>, bbox=<span class="built_in">dict</span>(fc=<span class="string">&quot;#222629&quot;</span>, ec=<span class="string">&quot;black&quot;</span>, boxstyle=<span class="string">&quot;round&quot;</span>, lw=<span class="number">1</span>)) <span class="comment"># 画边的标签-权值</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在画布上绘图</span></span><br><span class="line">self.figure.set_facecolor(<span class="string">&quot;mintcream&quot;</span>) <span class="comment"># 设定背景颜色</span></span><br><span class="line">self.canvas.draw_idle()	 	<span class="comment"># 在画布是作画</span></span><br><span class="line">self.canvas.flush_events() <span class="comment"># 刷新画布</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="上一步与下一步的控制"><a href="#上一步与下一步的控制" class="headerlink" title="上一步与下一步的控制"></a>上一步与下一步的控制</h2><p>这里我定义了一个 <strong>全局变量i</strong> 来记录邮递员在走最终路径时走到了第几个结点，即i作为最终路径经过的结点列表的下标，按下一步按钮，变量i的值加一；按上一步减一。</p>
+<p>邮递员每走一步或者退一步，都要判断当前点是否走过，即利用结点的颜色属性和边的颜色属性，如果满足条件就更新当前结点的颜色属性以及边的颜色属性，然后将其画到画布上。</p>
+<p>这里就是需要注意一下获取具体某一条边的颜色属性时，<strong>nx.get_edge_attributes(self.G, ‘color’)[(visited_node[m - 1], visited_node[m])]</strong> 后面 [] 里的值填入当前边起始结点和末端结点组成的元组时，有时候会找不到这条边的属性，发生报错。<strong>这是因为无向图的一条边有两种表现形式，但获取边的属性值时只能使用添加边时的那种表现形式</strong>，比如边AB,z在无向图中可以写成(‘A’,’B’)，也可以写成 (‘B’,’A’),但是添加边时用的是(‘A’,’B’)，那个查询边AB属性时，填入(‘B’,’A’)，就会报错。所以我这里使用了 <strong>try…except…语句</strong>。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    nx.draw_networkx_edges(self.G, self.pos, edgelist=[(visited_node[m - <span class="number">1</span>], visited_node[m])],</span><br><span class="line">                           edge_color=nx.get_edge_attributes(self.G, <span class="string">&#x27;color&#x27;</span>)[</span><br><span class="line">                               (visited_node[m - <span class="number">1</span>], visited_node[m])], width=<span class="number">5</span>)</span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">    nx.draw_networkx_edges(self.G, self.pos, edgelist=[(visited_node[m - <span class="number">1</span>], visited_node[m])],</span><br><span class="line">                           edge_color=nx.get_edge_attributes(self.G, <span class="string">&#x27;color&#x27;</span>)[</span><br><span class="line">                               (visited_node[m], visited_node[m - <span class="number">1</span>])], width=<span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="PyQT5设计UI"><a href="#PyQT5设计UI" class="headerlink" title="PyQT5设计UI"></a>PyQT5设计UI</h2><p>很常见的设计，这里就直接贴代码了，下面有一个 <strong>eval()函数还是挺有意思的</strong></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">NumButtons = [<span class="string">&#x27;init_graph&#x27;</span>, <span class="string">&#x27;next_step&#x27;</span>, <span class="string">&#x27;previous_step&#x27;</span>]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">initUI</span>(<span class="params">self</span>):</span></span><br><span class="line"></span><br><span class="line">    self.setGeometry(<span class="number">200</span>, <span class="number">200</span>, <span class="number">1600</span>, <span class="number">1000</span>)</span><br><span class="line">    self.center()</span><br><span class="line">    self.setWindowTitle(<span class="string">&#x27;中国邮递员算法演示&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    grid = QGridLayout()</span><br><span class="line">    self.setLayout(grid)</span><br><span class="line">    self.createVerticalGroupBox()</span><br><span class="line"></span><br><span class="line">    buttonLayout = QVBoxLayout()</span><br><span class="line">    buttonLayout.addWidget(self.verticalGroupBox)</span><br><span class="line"></span><br><span class="line">    self.figure = plt.figure(facecolor=<span class="string">&#x27;mintcream&#x27;</span>, edgecolor=<span class="string">&#x27;black&#x27;</span>)</span><br><span class="line">    <span class="comment"># self.figure = plt.figure(facecolor=&#x27;#222629&#x27;, edgecolor=&#x27;black&#x27;)</span></span><br><span class="line">    self.canvas = FigureCanvas(self.figure)</span><br><span class="line">    grid.addWidget(self.canvas, <span class="number">0</span>, <span class="number">1</span>, <span class="number">9</span>, <span class="number">9</span>)</span><br><span class="line">    grid.addLayout(buttonLayout, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">    self.show()</span><br><span class="line">    </span><br><span class="line"><span class="comment"># 创建按钮</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">createVerticalGroupBox</span>(<span class="params">self</span>):</span></span><br><span class="line">    self.verticalGroupBox = QGroupBox()</span><br><span class="line"></span><br><span class="line">    layout = QVBoxLayout()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> self.NumButtons:</span><br><span class="line">    button = QPushButton(i)</span><br><span class="line">    button.setFixedSize(<span class="number">200</span>, <span class="number">50</span>)</span><br><span class="line">    button.setObjectName(i)</span><br><span class="line">    layout.addWidget(button)</span><br><span class="line">    layout.setSpacing(<span class="number">20</span>)</span><br><span class="line">    self.verticalGroupBox.setLayout(layout)</span><br><span class="line">    button.clicked.connect(self.submitCommand)</span><br><span class="line">    </span><br><span class="line"><span class="comment"># 按钮控制事件链接</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">submitCommand</span>(<span class="params">self</span>):</span></span><br><span class="line">    <span class="built_in">eval</span>(<span class="string">&#x27;self.&#x27;</span> + <span class="built_in">str</span>(self.sender().objectName()) + <span class="string">&#x27;()&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="UI美化"><a href="#UI美化" class="headerlink" title="UI美化"></a>UI美化</h2><p>这里仅仅简单地调用了别人写好的皮肤，直接加载到UI上，有了它UI高大上了好多</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> qt_material <span class="keyword">import</span> apply_stylesheet</span><br><span class="line">apply_stylesheet(app, theme=<span class="string">&#x27;dark_teal.xml&#x27;</span>)    <span class="comment"># 导入QSS皮肤</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这次数据结构大作业我是负责UI设计部分的，一共花了5天时间，中间摸鱼了好一段时间，写的时间还是挺长的。一开始对实现这种图的可视化还是一概不知的，到处找资料，找了一天了解到了python的networkx库专门用于构建和操作复杂的图结构，然后就想去b站找视频学习一下，但是b站关于networkx的视频几乎没有，索性上油管上看着机翻字幕学了一会，再加上看各个博客关于networkx用法，自己再复制别人的代码调调，感觉有点认识后，直接照着官方文档写了两天，写出了充满bug的demo，最后就不断优化不断删删改改。</p>
+<p>总的来说，这几天的生活还是很充实的，学到了挺多东西的，不仅挑战了自己，锻炼了python基本功，还见识了很多有意思的东西。但是也有一些遗憾，有几个想实现的东西没有实现，有一些想尝试的东西没有时间去尝试，希望下次再遇到这种做项目的挑战的时候，自己能做的更好。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">pyh</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2021/12/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%A4%A7%E4%BD%9C%E4%B8%9A-UI%E8%AE%BE%E8%AE%A1/">http://example.com/2021/12/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%A4%A7%E4%BD%9C%E4%B8%9A-UI%E8%AE%BE%E8%AE%A1/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">爱玩且很菜</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a><a class="post-meta__tags" href="/tags/python/">python</a></div><div class="post_share"><div class="social-share" data-image="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-q2pgyr.webp" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/11/27/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%9C%9F%E6%9C%AB%E5%A4%8D%E4%B9%A0/"><img class="next-cover" src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-6oyw2w.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">数据结构期末复习</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/1580288142723622.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">pyh</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">19</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://sf2333.github.io/"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%AD%E5%9B%BD%E9%82%AE%E9%80%92%E5%91%98%E5%8F%AF%E8%A7%86%E5%8C%96%E8%AE%BE%E8%AE%A1"><span class="toc-number">1.</span> <span class="toc-text">中国邮递员可视化设计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%AD%E5%9B%BD%E9%82%AE%E9%80%92%E5%91%98%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-number">1.1.</span> <span class="toc-text">中国邮递员问题背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%88%90%E5%93%81%E5%B1%95%E7%A4%BA%E5%8F%8A%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.2.</span> <span class="toc-text">成品展示及功能介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E7%8E%AF%E5%A2%83"><span class="toc-number">1.3.</span> <span class="toc-text">设计环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF"><span class="toc-number">1.4.</span> <span class="toc-text">设计思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.5.</span> <span class="toc-text">具体实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E5%8F%96csv%E6%96%87%E4%BB%B6"><span class="toc-number">1.5.1.</span> <span class="toc-text">读取csv文件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#network%E6%9E%84%E9%80%A0%E6%97%A0%E5%90%91%E5%9B%BE-%EF%BC%88%E9%87%8D%E7%82%B9%EF%BC%89"><span class="toc-number">1.6.</span> <span class="toc-text">network构造无向图 （重点）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-number">1.6.1.</span> <span class="toc-text">初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E5%B1%9E%E6%80%A7"><span class="toc-number">1.6.2.</span> <span class="toc-text">添加属性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E7%BB%93%E7%82%B9%E7%9A%84%E5%9D%90%E6%A0%87"><span class="toc-number">1.6.3.</span> <span class="toc-text">获取结点的坐标</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#weight"><span class="toc-number">1.6.3.1.</span> <span class="toc-text">weight :</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%9B%E5%BC%95%E5%AF%BC%E5%B8%83%E5%B1%80%EF%BC%88Force-directed-Layout%EF%BC%89"><span class="toc-number">1.6.3.2.</span> <span class="toc-text">力引导布局（Force-directed Layout）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#itrations"><span class="toc-number">1.6.3.3.</span> <span class="toc-text">itrations:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#seed"><span class="toc-number">1.6.3.4.</span> <span class="toc-text">seed</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%86%E5%9B%BE%E7%94%BB%E5%87%BA%E6%9D%A5"><span class="toc-number">1.6.4.</span> <span class="toc-text">将图画出来</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8A%E4%B8%80%E6%AD%A5%E4%B8%8E%E4%B8%8B%E4%B8%80%E6%AD%A5%E7%9A%84%E6%8E%A7%E5%88%B6"><span class="toc-number">1.7.</span> <span class="toc-text">上一步与下一步的控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PyQT5%E8%AE%BE%E8%AE%A1UI"><span class="toc-number">1.8.</span> <span class="toc-text">PyQT5设计UI</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#UI%E7%BE%8E%E5%8C%96"><span class="toc-number">1.9.</span> <span class="toc-text">UI美化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.10.</span> <span class="toc-text">总结</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/12/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%A4%A7%E4%BD%9C%E4%B8%9A-UI%E8%AE%BE%E8%AE%A1/" title="数据结构大作业-算法可视化设计"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-q2pgyr.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="数据结构大作业-算法可视化设计"/></a><div class="content"><a class="title" href="/2021/12/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%A4%A7%E4%BD%9C%E4%B8%9A-UI%E8%AE%BE%E8%AE%A1/" title="数据结构大作业-算法可视化设计">数据结构大作业-算法可视化设计</a><time datetime="2021-12-06T02:10:25.000Z" title="发表于 2021-12-06 10:10:25">2021-12-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/27/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%9C%9F%E6%9C%AB%E5%A4%8D%E4%B9%A0/" title="数据结构期末复习"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-6oyw2w.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="数据结构期末复习"/></a><div class="content"><a class="title" href="/2021/11/27/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%9C%9F%E6%9C%AB%E5%A4%8D%E4%B9%A0/" title="数据结构期末复习">数据结构期末复习</a><time datetime="2021-11-27T13:20:45.000Z" title="发表于 2021-11-27 21:20:45">2021-11-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/23/kali%E6%B8%97%E9%80%8F%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/" title="Kali渗透测试工具使用"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-q2oz5r.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Kali渗透测试工具使用"/></a><div class="content"><a class="title" href="/2021/11/23/kali%E6%B8%97%E9%80%8F%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/" title="Kali渗透测试工具使用">Kali渗透测试工具使用</a><time datetime="2021-11-23T13:40:13.000Z" title="发表于 2021-11-23 21:40:13">2021-11-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/23/GUET%E6%A2%A6%E6%9E%81%E5%85%89%E6%9D%AF%EF%BC%88%E6%A0%A1%E8%B5%9B%EF%BC%89%E7%BA%BF%E4%B8%8B%20PWN%E8%B5%9B%E5%90%8E%E5%A4%8D%E7%8E%B0/" title="GUET梦极光杯（校赛）线下-PWN题赛后复现"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-573y33.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GUET梦极光杯（校赛）线下-PWN题赛后复现"/></a><div class="content"><a class="title" href="/2021/11/23/GUET%E6%A2%A6%E6%9E%81%E5%85%89%E6%9D%AF%EF%BC%88%E6%A0%A1%E8%B5%9B%EF%BC%89%E7%BA%BF%E4%B8%8B%20PWN%E8%B5%9B%E5%90%8E%E5%A4%8D%E7%8E%B0/" title="GUET梦极光杯（校赛）线下-PWN题赛后复现">GUET梦极光杯（校赛）线下-PWN题赛后复现</a><time datetime="2021-11-23T06:51:20.000Z" title="发表于 2021-11-23 14:51:20">2021-11-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/11/22/dedecms5.7%E4%BF%AE%E6%94%B9%E5%89%8D%E5%8F%B0%E7%99%BB%E9%99%86%E5%AF%86%E7%A0%81%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" title="dedecms5.7修改前台登陆密码漏洞复现"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-q2o26q_2560x1080.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="dedecms5.7修改前台登陆密码漏洞复现"/></a><div class="content"><a class="title" href="/2021/11/22/dedecms5.7%E4%BF%AE%E6%94%B9%E5%89%8D%E5%8F%B0%E7%99%BB%E9%99%86%E5%AF%86%E7%A0%81%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" title="dedecms5.7修改前台登陆密码漏洞复现">dedecms5.7修改前台登陆密码漏洞复现</a><time datetime="2021-11-22T13:52:41.000Z" title="发表于 2021-11-22 21:52:41">2021-11-22</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By pyh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'gs3x0tWmEaUp6ROxQivXPxe5-gzGzoHsz',
+      appKey: '8L9o8UYajHnPE9l93nFXvr60',
+      placeholder: '请在此留下你的足迹!',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'en',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+      requiredFields: ["nick,mail"],
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'http://example.com/2021/12/06/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%A4%A7%E4%BD%9C%E4%B8%9A-UI%E8%AE%BE%E8%AE%A1/'
+    this.page.identifier = '2021/12/06/数据结构大作业-UI设计/'
+    this.page.title = '数据结构大作业-算法可视化设计'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://shortname-tddqilfyge.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+}
+
+if ('Valine' === 'Disqus' || !true) {
+  if (true) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
